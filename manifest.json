@@ -1,0 +1,22 @@
+{
+  "manifest-version":2,
+  "name":"Bookmarks Annotations",
+  "description":"Adds user configurable notes to bookmark entries",
+  "version":"0.1α",
+  "developer":{
+    "name":"jase",
+    "url":"https://github.com/emmyemi/bookmarks-annotations"
+  },
+
+  "applications":{
+    "gecko":{
+      "id":"bookmarks-annotations@winter.coffee",
+      "strict_min_version":"60.0"
+    }
+  },
+
+  "permissions":[
+    "bookmarks",
+    "storage"
+  ]
+}
