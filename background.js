@@ -1,0 +1,1 @@
+export var bookmarks = await browser.bookmarks.getTree()

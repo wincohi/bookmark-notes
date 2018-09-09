@@ -4,7 +4,7 @@
   "description":"Adds user configurable notes to bookmark entries",
   "version":"0.1α",
   "developer":{
-    "name":"jase",
+    "name":"Jase",
     "url":"https://github.com/emmyemi/bookmarks-annotations"
   },
 
@@ -18,5 +18,14 @@
   "permissions":[
     "bookmarks",
     "storage"
-  ]
+  ],
+
+  "background":{
+    "scripts":["background.js"]
+  },
+
+  "sidebar_action":{
+    "default_title":"Annotations",
+    "default_panel":"pages/panel.html"
+  }
 }
