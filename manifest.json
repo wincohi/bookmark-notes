@@ -1,7 +1,7 @@
 {
   "manifest_version":2,
   "name":"Bookmark Notes",
-  "description":"Stores user configurable notes for bookmark entries",
+  "description":"Store and sync notes with bookmark entries",
   "version":"1.0",
   "developer":{
     "name":"Jase",
