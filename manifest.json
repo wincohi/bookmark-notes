@@ -1,16 +1,16 @@
 {
-  "manifest-version":2,
-  "name":"Bookmarks Annotations",
-  "description":"Adds user configurable notes to bookmark entries",
-  "version":"0.1α",
+  "manifest_version":2,
+  "name":"Bookmark Notes",
+  "description":"Stores user configurable notes for bookmark entries",
+  "version":"0.9.0",
   "developer":{
     "name":"Jase",
-    "url":"https://github.com/emmyemi/bookmarks-annotations"
+    "url":"https://github.com/emmyemi/bookmark-notes-webextension"
   },
 
   "applications":{
     "gecko":{
-      "id":"bookmarks-annotations@winter.coffee",
+      "id":"bookmark-notes@winter.coffee",
       "strict_min_version":"60.0"
     }
   },
@@ -24,8 +24,17 @@
     "scripts":["background.js"]
   },
 
+  "browser_action":{
+    "default_title":"Bookmark Notes",
+    "default_popup":"pages/panel.html",
+    "default_icon":{
+      "38":"img/icon.png"
+    }
+  },
+
   "sidebar_action":{
-    "default_title":"Annotations",
-    "default_panel":"pages/panel.html"
+    "default_title":"Bookmark Notes",
+    "default_panel":"pages/panel.html",
+    "default_icon":"img/icon.png"
   }
 }

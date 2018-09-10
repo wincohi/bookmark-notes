@@ -1,18 +1,31 @@
 <!DOCTYPE html>
 <html>
-
 <head>
   <meta charset="UTF-8">
+  <link rel="stylesheet" href="panel.css">
 </head>
-
 <body>
-
   <div id="panel">
+    <div id="tree" data-id="_root">
+      <!-- bookmarks are printed here -->
+    </div>
+  </div>
 
+  <div id="popup-bg">
+    <div id="popup">
+      <div id="popup-title-group">
+        <span id="popup-title"></span>
+        <span id="popup-url"></span>
+      </div>
+      <textarea name="note" id="note-input" placeholder="Type your notes here&hellip;"></textarea>
+      <div id="popup-buttons">
+        <div class="button cancel">Cancel</div>
+        <div class="button save">Save</div>
+      </div>
+    </div>
   </div>
 
   <script src="panel.js"></script>
 
 </body>
-
 </html>
