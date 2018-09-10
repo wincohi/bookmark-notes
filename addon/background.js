@@ -1,12 +1,11 @@
-var bookmarks,
-storedNotes
+var bookmarks
 
 var initBg = async (isReload = false) => {
   browser.bookmarks.getTree().then((b) => {
     bookmarks = b
     if (isReload) {
       // if called from an event, send an update message to any open panels
-      browser.runtime.sendMessage({ type:'bookmarkUpdate', obj:{ storedNotes:storedNotes }}).then((msg) => {
+      browser.runtime.sendMessage({ type:'bookmarkUpdate' }).then((msg) => {
         console.log(msg.response)
       }, (err) => {
         console.error(err)
@@ -15,13 +14,6 @@ var initBg = async (isReload = false) => {
   }, (err) => {
     console.error(`error reading bookmarks: ${err}`)
   })
-  if (!isReload) {
-    browser.storage.sync.get().then((s) => {
-      storedNotes = s.notes
-    }, (err) => {
-      console.error(`error getting storage: ${err}`)
-    })
-  }
 },
 sendMsg = (reason = '') => {
   initBg(true)

@@ -67,9 +67,12 @@ openPopup = async (obj) => {
   let popup = document.querySelector('#popup-bg'),
   popupTitle = document.querySelector('#popup-title'),
   popupUrl = document.querySelector('#popup-url')
-  if (storedNotes[obj.id]) {
-    document.querySelector('#note-input').value = storedNotes[obj.id]
-  }
+  browser.storage.sync.get().then((result) => {
+    storedNotes = result.notes || {}
+    if (storedNotes[obj.id]) {
+      document.querySelector('#note-input').value = storedNotes[obj.id]
+    }
+  })
   document.body.setAttribute('popup-opened','true')
   popup.setAttribute('data-open-id', obj.id)
   popupTitle.setAttribute('title', obj.title)
@@ -83,11 +86,11 @@ closePopup = async (method, event) => {
   }
   switch (method) {
     case 'save':
-      let notes = storedNotes
-      notes[popup.id] = document.querySelector('#note-input').value
+      let notes
+      storedNotes[popup.id] = document.querySelector('#note-input').value
+      notes = storedNotes
       console.log(notes)
       browser.storage.sync.set({ notes })
-      storedNotes = notes
     case 'cancel':
       document.body.removeAttribute('popup-opened')
       popup.element.removeAttribute('data-open-id')
@@ -132,7 +135,6 @@ panelInit = async (isReload = false, bkmkObject) => {
   browser.runtime.getBackgroundPage().then((w) => {
     /* note: the background page sends an object with current bookmarks in it, but
      * i haven't been able to implement it without breaking addListeners() */
-    storedNotes = w.storedNotes || {}
     w.bookmarks[0].children.forEach((b, i, arr) => {
       makeTree(b)
     })
