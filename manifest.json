@@ -2,7 +2,7 @@
   "manifest_version":2,
   "name":"Bookmark Notes",
   "description":"Stores user configurable notes for bookmark entries",
-  "version":"0.9.0",
+  "version":"1.0",
   "developer":{
     "name":"Jase",
     "url":"https://github.com/emmyemi/bookmark-notes"
