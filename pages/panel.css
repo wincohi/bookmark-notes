@@ -3,6 +3,7 @@ body{
   font:-moz-document;
   color:-moz-fieldtext;
   background-color:-moz-field;
+  max-width:550px;
 }
 body[popup-opened]{
   overflow:hidden;
@@ -68,16 +69,19 @@ li:hover{
   position:fixed;
   top:0;
   left:0;
+  padding:.75em;
   width:100%;
   height:100%;
   background-color:rgba(0,0,0,.65);
-  transition:opacity .2s var(--quantum-timing-func)
+  transition:opacity .2s var(--quantum-timing-func);
+  text-align:center;
 }
 #popup{
   font:-moz-dialog;
   color:-moz-dialogtext;
   border-radius:4px;
-  margin:25vh 1em;
+  margin:25vh auto;
+  max-width:400px;
   height:50vh;
   background-color:-moz-dialog;
   display:flex;
@@ -131,19 +135,25 @@ body:not([popup-opened]) #popup{
   display:flex;
   border-top:1px solid -moz-cellhighlight;
   margin: .5em -.5em -.5em;
+  border-radius:0 0 4px 4px;
+  overflow:hidden;
+  align-items:center;
 }
 #popup-buttons>.button{
+  font-weight:bolder;
   background-color:-moz-buttondefault;
-  border-radius:0 0 0 4px;
   flex:1;
   text-align:center;
-  padding:.5em 0;
+  padding:1.13em 0;
   cursor:pointer;
 }
 #popup-buttons>.button.save{
-  border-radius:0 0 4px 0;
   background-color:Highlight;
   color:-moz-cellhighlighttext;
+  border-left:1px solid -moz-cellhighlight;
+}
+#popup-buttons>.button.cancel:hover{
+  background-color:-moz-cellhighlight;
 }
 #popup-buttons>.button:hover{
   text-decoration:underline;

@@ -5,23 +5,11 @@ var tree = { // this obj is mostly for debugging
     storedNotes,
     printTgt = document.querySelector('#tree')
 
-var htmlEscape = (input = '') => {
-  // escape anything that isn't supposed to be HTML to avoid messing things up
-  let escapeChars = ['"::&quot;', '<::&lt;', '&::&amp;', '>::&rt;'],
-  output = input
-  escapeChars.forEach((c, i, arr) => {
-    let esc = c.split('::')
-    if (input.indexOf(esc[0]) !== -1) {
-      output = input.replace(esc[0], esc[1])
-    }
-  })
-    return output
-},
-checkTitle = (input = '') => {
+var checkTitle = (input = '') => {
   if (input === '') {
     return '(No title)'
   } else {
-    return htmlEscape(input)
+    return input
   }
 },
 setAttributes = (el, a) => {
@@ -34,15 +22,21 @@ makeTree = async (item, parent = tree) => {
   let parentEl = document.querySelector(`[data-id="${parent.id}"]`),
   template = {
     bookmark:(b) => {
-      let el = document.createElement('li')
+      let el = document.createElement('li'),
+      elChild = document.createElement('span')
       setAttributes(el, { "class":"item bookmark", "data-id":b.id, "title":b.url, "data-title":checkTitle(b.title) })
-      el.innerHTML = `<span class="title">${checkTitle(b.title)}</span>`
+      setAttributes(elChild, { "class":"title" })
+      elChild.appendChild(document.createTextNode(`${checkTitle(b.title)}`))
+      el.appendChild(elChild)
       return el
     },
     folder:(f) => {
-      let el = document.createElement('ul')
+      let el = document.createElement('ul'),
+      elChild = document.createElement('span')
       setAttributes(el, { "class":"item folder", "data-id":f.id })
-      el.innerHTML = `<span class="title">${checkTitle(f.title)}</span>`
+      setAttributes(elChild, { "class":"title" })
+      elChild.appendChild(document.createTextNode(`${checkTitle(f.title)}`))
+      el.appendChild(elChild)
       return el
     }
   }
@@ -93,7 +87,6 @@ closePopup = async (method, event) => {
   }
   switch (method) {
     case 'save':
-      // this is where the storage writing code goes
       let notes = storedNotes
       notes[popup.id] = document.querySelector('#note-input').value
       console.log(notes)
@@ -111,12 +104,17 @@ closePopup = async (method, event) => {
 expandCollapse = (tgt) => {
   tgt.classList.toggle('collapsed')
 },
-panelInit = async (isReload = false) => {
-browser.runtime.getBackgroundPage().then((w) => {
-  storedNotes = w.storedNotes || {}
-    w.bookmarks[0].children.forEach((b, i, arr) => {
-      makeTree(b)
-    })
+panelInit = async (isReload = false, bkmkObject) => {
+  let addListeners = async () => {
+    if (!isReload) {
+      // we don't need to add listeners to Save & Cancel buttons if we already have, so don't
+      document.querySelector('#popup-buttons>.button.cancel').addEventListener('click', (ev) => {
+        closePopup('cancel', ev)
+      })
+      document.querySelector('#popup-buttons>.button.save').addEventListener('click', (ev) => {
+        closePopup('save', ev)
+      })
+    }
     document.querySelectorAll('li.bookmark').forEach((el, i, arr) => {
       el.addEventListener('click', (ev) => {
         openPopup({
@@ -131,14 +129,18 @@ browser.runtime.getBackgroundPage().then((w) => {
         expandCollapse(ev.currentTarget.parentNode)
       })
     })
-    if (!isReload) {
-    document.querySelector('#popup-buttons>.button.cancel').addEventListener('click', (ev) => {
-      closePopup('cancel', ev)
-    })
-    document.querySelector('#popup-buttons>.button.save').addEventListener('click', (ev) => {
-      closePopup('save', ev)
-    })
   }
+  if (isReload) {
+    document.querySelector('#tree').innerHTML = ''
+  }
+  browser.runtime.getBackgroundPage().then((w) => {
+    if (!isReload) {
+      storedNotes = w.storedNotes || {}
+    }
+    w.bookmarks[0].children.forEach((b, i, arr) => {
+      makeTree(b)
+    })
+    addListeners()
   }, (err) => {
     console.error(`error getting background context: ${err}`)
   })
@@ -146,5 +148,16 @@ browser.runtime.getBackgroundPage().then((w) => {
 
 // - - - end function defs - - -
 
-  panelInit()
+panelInit()
+
+browser.runtime.onMessage.addListener((msg, sender, respond) => {
+  switch (msg.type) {
+    case 'bookmarkUpdate':
+      storedNotes = msg.obj.storedNotes
+      panelInit(true)
+      respond({ type:'success', response:'*thumbs up emoji*' })
+      break
+    default:
+      respond({ type:'error', response:`unknown or missing message type: '${msg.type}'` })
+  }
 })
