@@ -7,15 +7,15 @@ var tree = { // this obj is mostly for debugging
 
 var htmlEscape = (input = '') => {
   // escape anything that isn't supposed to be HTML to avoid messing things up
-  if ((input.indexOf('<') || input.indexOf('&') || input.indexOf('>')) !== -1) {
-    let output = input
-    output = output.replace('&', '&amp;')
-    output = output.replace('<', '&lt;')
-    output = output.replace('>', '&rt;')
+  let escapeChars = ['"::&quot;', '<::&lt;', '&::&amp;', '>::&rt;'],
+  output = input
+  escapeChars.forEach((c, i, arr) => {
+    let esc = c.split('::')
+    if (input.indexOf(esc[0]) !== -1) {
+      output = input.replace(esc[0], esc[1])
+    }
+  })
     return output
-  } else {
-    return input
-  }
 },
 checkTitle = (input = '') => {
   if (input === '') {
