@@ -20,25 +20,21 @@ setAttributes = (el, a) => {
 },
 makeTree = async (item, parent = tree) => {
   let parentEl = document.querySelector(`[data-id="${parent.id}"]`),
-  template = {
-    bookmark:(b) => {
-      let el = document.createElement('li'),
-      elChild = document.createElement('span')
-      setAttributes(el, { "class":"item bookmark", "data-id":b.id, "title":b.url, "data-title":checkTitle(b.title) })
-      setAttributes(elChild, { "class":"title" })
-      elChild.appendChild(document.createTextNode(`${checkTitle(b.title)}`))
-      el.appendChild(elChild)
-      return el
-    },
-    folder:(f) => {
-      let el = document.createElement('ul'),
-      elChild = document.createElement('span')
-      setAttributes(el, { "class":"item folder", "data-id":f.id })
-      setAttributes(elChild, { "class":"title" })
-      elChild.appendChild(document.createTextNode(`${checkTitle(f.title)}`))
-      el.appendChild(elChild)
-      return el
+  mkTemplate = (i) => {
+    let elType = 'li'
+    if (i.type === 'folder') {
+      elType = 'ul'
     }
+    let el = document.createElement(elType),
+    elChild = document.createElement('span')
+    setAttributes(el, { "class":`item ${i.type}`, "data-id":i.id })
+    setAttributes(elChild, { "class":"title" })
+    if (i.type === 'bookmark') {
+      setAttributes(el, { "title":i.url, "data-title":checkTitle(i.title) })
+    }
+    elChild.appendChild(document.createTextNode(`${checkTitle(i.title)}`))
+    el.appendChild(elChild)
+    return el
   }
   if (item.url) {
     // if the item has a URL, it's a bookmark; otherwise, it's a folder
@@ -48,7 +44,7 @@ makeTree = async (item, parent = tree) => {
       id: item.id,
       type: 'bookmark'
     }
-    parentEl.appendChild(template.bookmark(bookmark))
+    parentEl.appendChild(mkTemplate(bookmark))
     parent.children.push(bookmark)
   } else if (item.children) {
     let folder = {
@@ -57,7 +53,7 @@ makeTree = async (item, parent = tree) => {
       type: 'folder',
       children: []
     }
-    parentEl.appendChild(template.folder(folder))
+    parentEl.appendChild(mkTemplate(folder))
     parent.children.push(folder)
     for (child of item.children) {
       // we iterate on this function for each child of the folder
@@ -134,9 +130,9 @@ panelInit = async (isReload = false, bkmkObject) => {
     document.querySelector('#tree').innerHTML = ''
   }
   browser.runtime.getBackgroundPage().then((w) => {
-    if (!isReload) {
-      storedNotes = w.storedNotes || {}
-    }
+    /* note: the background page sends an object with current bookmarks in it, but
+     * i haven't been able to implement it without breaking addListeners() */
+    storedNotes = w.storedNotes || {}
     w.bookmarks[0].children.forEach((b, i, arr) => {
       makeTree(b)
     })
@@ -153,7 +149,6 @@ panelInit()
 browser.runtime.onMessage.addListener((msg, sender, respond) => {
   switch (msg.type) {
     case 'bookmarkUpdate':
-      storedNotes = msg.obj.storedNotes
       panelInit(true)
       respond({ type:'success', response:'*thumbs up emoji*' })
       break

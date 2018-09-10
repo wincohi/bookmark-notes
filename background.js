@@ -5,6 +5,7 @@ var initBg = async (isReload = false) => {
   browser.bookmarks.getTree().then((b) => {
     bookmarks = b
     if (isReload) {
+      // if called from an event, send an update message to any open panels
       browser.runtime.sendMessage({ type:'bookmarkUpdate', obj:{ storedNotes:storedNotes }}).then((msg) => {
         console.log(msg.response)
       }, (err) => {
