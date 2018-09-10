@@ -110,13 +110,10 @@ closePopup = async (method, event) => {
 },
 expandCollapse = (tgt) => {
   tgt.classList.toggle('collapsed')
-}
-
-// - - - end function defs - - -
-
+},
+panelInit = async (isReload = false) => {
 browser.runtime.getBackgroundPage().then((w) => {
   storedNotes = w.storedNotes || {}
-  let panelInit = async () => {
     w.bookmarks[0].children.forEach((b, i, arr) => {
       makeTree(b)
     })
@@ -134,6 +131,7 @@ browser.runtime.getBackgroundPage().then((w) => {
         expandCollapse(ev.currentTarget.parentNode)
       })
     })
+    if (!isReload) {
     document.querySelector('#popup-buttons>.button.cancel').addEventListener('click', (ev) => {
       closePopup('cancel', ev)
     })
@@ -141,6 +139,12 @@ browser.runtime.getBackgroundPage().then((w) => {
       closePopup('save', ev)
     })
   }
+  }, (err) => {
+    console.error(`error getting background context: ${err}`)
+  })
+}
+
+// - - - end function defs - - -
 
   panelInit()
 })
