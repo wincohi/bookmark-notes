@@ -1,7 +1,7 @@
 {
   "manifest_version":2,
   "name":"Bookmark Notes",
-  "description":"Store and sync notes with bookmark entries",
+  "description":"Store notes with bookmarks, a la pre-Firefox-62",
   "version":"1.0",
   "developer":{
     "name":"Jase",
