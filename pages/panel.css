@@ -52,13 +52,10 @@ ul.collapsed{
 }
 ul.collapsed>.title{
   opacity:.7;
-  margin-left:0;
+  margin-left:-.1em;
 }
 ul>ul.collapsed{
   margin-left:0;
-}
-#tree>ul.collapsed>.title{
-  margin-left:-.1em;
 }
 ul>.title:hover{
   opacity:.8;
