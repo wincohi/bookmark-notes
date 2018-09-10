@@ -102,7 +102,7 @@ li:hover{
 #popup-title{
   font-weight:bolder;
   font-size:1.13em;
-  max-height:2.86em;
+  max-height:2.8em;
 }
 #popup-url{
   white-space:nowrap;
@@ -140,20 +140,18 @@ body:not([popup-opened]) #popup{
   align-items:center;
 }
 #popup-buttons>.button{
+  font:-moz-button;
   font-weight:bolder;
-  background-color:-moz-buttondefault;
+  background-color:-moz-buttonhoverface;
   flex:1;
   text-align:center;
   padding:1.13em 0;
   cursor:pointer;
 }
 #popup-buttons>.button.save{
-  background-color:Highlight;
-  color:-moz-cellhighlighttext;
+  background-color:-moz-menuhover;
+  color:-moz-default-background-color;
   border-left:1px solid -moz-cellhighlight;
-}
-#popup-buttons>.button.cancel:hover{
-  background-color:-moz-cellhighlight;
 }
 #popup-buttons>.button:hover{
   text-decoration:underline;
