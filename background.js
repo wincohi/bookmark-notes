@@ -1,6 +1,7 @@
 var bookmarks,
 storedNotes
 
+var initBg = (isReload = false) => {
 browser.bookmarks.getTree().then((b) => {
   bookmarks = b
 }, (err) => {
@@ -10,4 +11,6 @@ browser.storage.sync.get().then((s) => {
   storedNotes = s.notes
 }, (err) => {
   console.error(`error getting storage: ${err}`)
-})
+  })
+}
+
