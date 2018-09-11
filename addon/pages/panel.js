@@ -3,6 +3,7 @@ var tree = { // this obj is mostly for debugging
       children: []
     },
     storedNotes,
+    bookmarks,
     printTgt = document.querySelector('#tree')
 
 var checkTitle = (input = '') => {
@@ -132,10 +133,8 @@ panelInit = async (isReload = false, bkmkObject) => {
   if (isReload) {
     document.querySelector('#tree').innerHTML = ''
   }
-  browser.runtime.getBackgroundPage().then((w) => {
-    /* note: the background page sends an object with current bookmarks in it, but
-     * i haven't been able to implement it without breaking addListeners() */
-    w.bookmarks[0].children.forEach((b, i, arr) => {
+  browser.bookmarks.getTree().then((bkm) => {
+    bkm[0].children.forEach((b, i, arr) => {
       makeTree(b)
     })
     addListeners()
