@@ -25,8 +25,7 @@
   },
 
   "browser_action":{
-    "default_title":"Bookmark Notes",
-    "default_popup":"pages/panel.html",
+    "default_title":"Open Bookmark Notes",
     "default_icon":{
       "38":"img/icon.png"
     }

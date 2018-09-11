@@ -25,3 +25,6 @@ eventTgts.forEach((tgt, i, arr) => {
     sendMsg('bookmarkUpdate')
   })
 })
+browser.browserAction.onClicked.addListener((tab) => {
+  browser.sidebarAction.open()
+})
