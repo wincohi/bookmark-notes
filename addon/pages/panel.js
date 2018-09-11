@@ -74,7 +74,7 @@ openPopup = async (obj) => {
   document.body.setAttribute('popup-opened','true')
   popup.setAttribute('data-open-id', obj.id)
   popupTitle.setAttribute('title', obj.title)
-  popupUrl.setAttribute('title', obj.url)
+  setAttributes(popupUrl, { 'title':obj.url, 'href':obj.url })
   document.querySelector('#note-input').focus()
 },
 closePopup = async (method, event) => {

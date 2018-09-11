@@ -101,7 +101,7 @@ li:hover{
 #popup-title-group{
   width:100%;
 }
-#popup-title-group>span{
+#popup-title-group>*{
   display:block;
   text-align:center;
   text-overflow:clip;
@@ -113,10 +113,16 @@ li:hover{
   max-height:2.8em;
 }
 #popup-url{
+  color:inherit;
+  text-decoration:none;
+  font-style:italic;
   white-space:nowrap;
   font-size:0.84em;
   opacity:.65;
   mask-image:linear-gradient(to right, black, black calc(100% - 1em), transparent 100%);
+}
+#popup-url:hover{
+  text-decoration:underline;
 }
 #note-input{
   border-radius:2px;
