@@ -1,7 +1,4 @@
-var tree = { // this obj is mostly for debugging
-      id: '_root',
-      children: []
-    },
+var tree = { id: '_root' },
     storedNotes,
     bookmarks,
     printTgt = document.querySelector('#tree')
@@ -46,7 +43,6 @@ makeTree = async (item, parent = tree) => {
       type: 'bookmark'
     }
     parentEl.appendChild(mkTemplate(bookmark))
-    parent.children.push(bookmark)
   } else if (item.children) {
     let folder = {
       title: item.title,
@@ -55,7 +51,6 @@ makeTree = async (item, parent = tree) => {
       children: []
     }
     parentEl.appendChild(mkTemplate(folder))
-    parent.children.push(folder)
     for (child of item.children) {
       // we iterate on this function for each child of the folder
       makeTree(child, parent.children.find((el) => {
