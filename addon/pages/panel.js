@@ -1,4 +1,4 @@
-var tree = { id: '_root' },
+var tree = { id:'_root', children:[] },
     storedNotes,
     bookmarks,
     printTgt = document.querySelector('#tree')
@@ -10,7 +10,7 @@ var checkTitle = (input = '') => {
     return input
   }
 },
-setAttributes = (el, a) => {
+setAttributes = async (el, a) => {
   let aNames = Object.getOwnPropertyNames(a)
   aNames.forEach((item, index) => {
     el.setAttribute(aNames[index], a[aNames[index]])
@@ -43,6 +43,7 @@ makeTree = async (item, parent = tree) => {
       type: 'bookmark'
     }
     parentEl.appendChild(mkTemplate(bookmark))
+    parent.children.push(bookmark)
   } else if (item.children) {
     let folder = {
       title: item.title,
@@ -51,6 +52,7 @@ makeTree = async (item, parent = tree) => {
       children: []
     }
     parentEl.appendChild(mkTemplate(folder))
+    parent.children.push(folder)
     for (child of item.children) {
       // we iterate on this function for each child of the folder
       makeTree(child, parent.children.find((el) => {
@@ -96,7 +98,7 @@ closePopup = async (method, event) => {
       console.error(`unknown popup handling method: ${method}`)
   }
 },
-expandCollapse = (tgt) => {
+expandCollapse = async (tgt) => {
   tgt.classList.toggle('collapsed')
 },
 panelInit = async (isReload = false, bkmkObject) => {
@@ -134,7 +136,7 @@ panelInit = async (isReload = false, bkmkObject) => {
     })
     addListeners()
   }, (err) => {
-    console.error(`error getting background context: ${err}`)
+    console.error(`error getting bookmarks: ${err}`)
   })
 }
 
