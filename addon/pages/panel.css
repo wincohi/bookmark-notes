@@ -46,6 +46,10 @@ ul>.title{
   cursor:pointer;
   transition:opacity .15s var(--quantum-timing-func)
 }
+ul>.title::before{
+  content:'\2013';
+  padding-right:.2em;
+}
 ul.collapsed{
   height:1.79em;
   overflow-y:hidden;
@@ -54,6 +58,10 @@ ul.collapsed{
 ul.collapsed>.title{
   opacity:.7;
   margin-left:-.1em;
+}
+ul.collapsed>.title::before{
+  content:'+';
+  padding-right:.2em;
 }
 ul>ul.collapsed{
   margin-left:0;
