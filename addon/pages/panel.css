@@ -139,7 +139,7 @@ body:not([popup-opened]) #popup-bg{
   pointer-events:none;
 }
 body:not([popup-opened]) #popup{
-  transform:scale(.95);
+  transform:translate(0, -.75em);
 }
 #popup-title::before,
 #popup-url::before{
