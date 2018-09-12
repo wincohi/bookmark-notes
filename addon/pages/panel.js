@@ -1,6 +1,5 @@
 var tree = { id:'_root', children:[] },
     savedNotes,
-    bookmarks,
     popup = { element:document.querySelector('#popup-bg') },
     popupTitle = document.querySelector('#popup-title'),
     popupUrl = document.querySelector('#popup-url')
