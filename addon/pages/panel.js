@@ -5,6 +5,7 @@ var tree = { id:'_root', children:[] },
     popupTitle = document.querySelector('#popup-title'),
     popupUrl = document.querySelector('#popup-url')
 
+// initial storage gets
 browser.storage.local.get('collapsed').then((res) => {
   collapsedFolders = res.collapsed || []
 }, (err) => {
