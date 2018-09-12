@@ -1,8 +1,20 @@
 var tree = { id:'_root', children:[] },
     savedNotes,
+    collapsedFolders,
     popup = { element:document.querySelector('#popup-bg') },
     popupTitle = document.querySelector('#popup-title'),
     popupUrl = document.querySelector('#popup-url')
+
+browser.storage.local.get('collapsed').then((res) => {
+  collapsedFolders = res.collapsed || []
+}, (err) => {
+  console.error(`error getting local storage: '${err}'`)
+})
+browser.storage.sync.get('notes').then((res) => {
+  savedNotes = res.notes || {}
+}, (err) => {
+  console.error(`error getting synced notes: '${err}`)
+})
 
 var checkTitle = (input = { title:'', url:'' }) => {
   switch (input.title) {
@@ -48,10 +60,24 @@ setAttributes = async (el, atts, method = 'set') => {
     doAttr(el)
   }
 },
+getAttributes = (input, attr) => {
+  let output = []
+  input.forEach((item, index, arr) => {
+    output.push(item.getAttribute(attr))
+  })
+  return output
+}
 makeTree = async (item, parent = tree) => {
   let parentEl = document.querySelector(`[data-id="${parent.id}"]`),
   mkTemplate = (i) => {
-    let elType = 'li'
+    let elType = 'li',
+    isCollapsed = (id) => {
+      if (collapsedFolders.length !== 0 && collapsedFolders.includes(id)) {
+        return true
+      } else {
+        return false
+      }
+    }
     if (i.type === 'folder') {
       elType = 'ul'
     }
@@ -62,6 +88,10 @@ makeTree = async (item, parent = tree) => {
       { 'class':'title' }])
     if (i.type === 'bookmark') {
       setAttributes(el, { 'title':i.url, 'data-title':checkTitle(i) })
+    } else {
+      if (isCollapsed(i.id)) {
+        el.classList.add('collapsed')
+      }
     }
     elChild.appendChild(document.createTextNode(`${checkTitle(i)}`))
     el.appendChild(elChild)
@@ -95,8 +125,8 @@ makeTree = async (item, parent = tree) => {
   }
 },
 openPopup = async (obj) => {
-  browser.storage.sync.get().then((result) => {
-    savedNotes = result.notes || {}
+  browser.storage.sync.get('notes').then((res) => {
+    savedNotes = res.notes || {}
     if (savedNotes[obj.id]) {
       document.querySelector('#note-input').value = savedNotes[obj.id]
     }
@@ -112,9 +142,8 @@ closePopup = async (method, event) => {
   popup.id = popup.element.getAttribute('data-open-id')
   switch (method) {
     case 'save':
-      let notes
       savedNotes[popup.id] = document.querySelector('#note-input').value
-      notes = savedNotes
+      let notes = savedNotes
       console.log(notes)
       browser.storage.sync.set({ notes })
     case 'cancel':
@@ -126,7 +155,30 @@ closePopup = async (method, event) => {
   }
 },
 expandCollapse = async (tgt) => {
+  let collEl = getAttributes(document.querySelectorAll('.collapsed'), 'data-id'),
+  newColl = collapsedFolders || []
   tgt.classList.toggle('collapsed')
+  switch (collEl.length) {
+    case 0:
+      if (collapsedFolders !== []) {
+        newColl = []
+      }
+      break
+    default:
+      collEl.forEach((item, index, arr) => {
+        if (!collapsedFolders.includes(item)) {
+          newColl.push(item)
+        }
+      })
+      collapsedFolders.forEach((item, index, arr) => {
+        if (!collEl.includes(item)) {
+          newColl.splice(newColl.indexOf(item), 1)
+        }
+      })
+  }
+  console.log('done')
+  collapsedFolders = newColl
+  browser.storage.local.set({ collapsed:newColl })
 },
 panelInit = async (isReload = false, bkmkObject) => {
   let addListeners = async () => {
