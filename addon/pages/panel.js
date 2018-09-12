@@ -154,10 +154,9 @@ closePopup = async (method, event) => {
       console.error(`unknown popup handling method: ${method}`)
   }
 },
-expandCollapse = async (tgt) => {
+expandCollapse = async () => {
   let collEl = getAttributes(document.querySelectorAll('.collapsed'), 'data-id'),
   newColl = collapsedFolders || []
-  tgt.classList.toggle('collapsed')
   switch (collEl.length) {
     case 0:
       /* if there are no collapsed elements, but there are
@@ -180,7 +179,9 @@ expandCollapse = async (tgt) => {
       })
   }
   collapsedFolders = newColl
-  browser.storage.local.set({ collapsed:newColl })
+  browser.storage.local.set({ collapsed:newColl }).then((res) => {
+    console.log(newColl)
+  })
 },
 panelInit = async (isReload = false, bkmkObject) => {
   let addListeners = async () => {
@@ -204,7 +205,8 @@ panelInit = async (isReload = false, bkmkObject) => {
     })
     document.querySelectorAll('ul>.title').forEach((el, i, arr) => {
       el.addEventListener('click', (ev) => {
-        expandCollapse(ev.currentTarget.parentNode)
+        ev.currentTarget.parentNode.classList.toggle('collapsed')
+        expandCollapse()
       })
     })
   }
