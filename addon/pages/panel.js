@@ -1,7 +1,6 @@
 var tree = { id:'_root', children:[] },
     savedNotes,
     bookmarks,
-    printTgt = document.querySelector('#tree'),
     popup = { element:document.querySelector('#popup-bg') },
     popupTitle = document.querySelector('#popup-title'),
     popupUrl = document.querySelector('#popup-url')
