@@ -1,15 +1,12 @@
-var initBg = async (isFromEvent = false, type = '') => {
-  if (isFromEvent) {
-    // if called from an event, send an update message to any open panels
-    browser.runtime.sendMessage({ type:type }).then((msg) => {
-      console.log(msg.response)
-    }, (err) => {
-      console.error(err)
-    })
-  }
+var update = async (type = '') => {
+  browser.runtime.sendMessage({ type:type }).then((msg) => {
+    console.log(msg.response)
+  }, (err) => {
+    console.error(err)
+  })
 },
 sendMsg = (reason = '') => {
-  initBg(true, reason)
+  update(reason)
 },
 eventTgts = [
   browser.bookmarks.onChanged,
@@ -17,8 +14,6 @@ eventTgts = [
   browser.bookmarks.onMoved,
   browser.bookmarks.onRemoved
 ]
-
-initBg()
 
 eventTgts.forEach((tgt, i, arr) => {
   tgt.addListener(() => {
