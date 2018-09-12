@@ -1,7 +1,10 @@
 var tree = { id:'_root', children:[] },
-    storedNotes,
+    savedNotes,
     bookmarks,
-    printTgt = document.querySelector('#tree')
+    printTgt = document.querySelector('#tree'),
+    popup = { element:document.querySelector('#popup-bg') },
+    popupTitle = document.querySelector('#popup-title'),
+    popupUrl = document.querySelector('#popup-url')
 
 var checkTitle = (input = '') => {
   if (input === '') {
@@ -35,7 +38,7 @@ makeTree = async (item, parent = tree) => {
     return el
   }
   if (item.url) {
-    // if the item has a URL, it's a bookmark; otherwise, it's a folder
+    // if the item has a URL, it's a bookmark; otherwise, it's a folder or separator
     let bookmark = {
       title: item.title,
       url: item.url,
@@ -62,31 +65,25 @@ makeTree = async (item, parent = tree) => {
   }
 },
 openPopup = async (obj) => {
-  let popup = document.querySelector('#popup-bg'),
-  popupTitle = document.querySelector('#popup-title'),
-  popupUrl = document.querySelector('#popup-url')
   browser.storage.sync.get().then((result) => {
-    storedNotes = result.notes || {}
+    savedNotes = result.notes || {}
     if (storedNotes[obj.id]) {
-      document.querySelector('#note-input').value = storedNotes[obj.id]
+      document.querySelector('#note-input').value = savedNotes[obj.id]
     }
   })
   document.body.setAttribute('popup-opened','true')
-  popup.setAttribute('data-open-id', obj.id)
+  popup.element.setAttribute('data-open-id', obj.id)
   popupTitle.setAttribute('title', obj.title)
   setAttributes(popupUrl, { 'title':obj.url, 'href':obj.url })
   document.querySelector('#note-input').focus()
 },
 closePopup = async (method, event) => {
-  let popup = {
-    element:document.querySelector('#popup-bg'),
-    id: document.querySelector('#popup-bg').getAttribute('data-open-id')
-  }
+  popup.id = popup.element.getAttribute('data-open-id')
   switch (method) {
     case 'save':
       let notes
-      storedNotes[popup.id] = document.querySelector('#note-input').value
-      notes = storedNotes
+      savedNotes[popup.id] = document.querySelector('#note-input').value
+      notes = savedNotes
       console.log(notes)
       browser.storage.sync.set({ notes })
     case 'cancel':
@@ -128,6 +125,7 @@ panelInit = async (isReload = false, bkmkObject) => {
     })
   }
   if (isReload) {
+    // clear the tree if we're reloading the bookmarks from scratch
     document.querySelector('#tree').innerHTML = ''
   }
   browser.bookmarks.getTree().then((bkm) => {
