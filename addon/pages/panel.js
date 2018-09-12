@@ -6,18 +6,49 @@ var tree = { id:'_root', children:[] },
     popupTitle = document.querySelector('#popup-title'),
     popupUrl = document.querySelector('#popup-url')
 
-var checkTitle = (input = '') => {
-  if (input === '') {
-    return '(No title)'
+var checkTitle = (input = { title:'', url:'' }) => {
+  switch (input.title) {
+    case '':
+    case undefined:
+      if (input.url && input.url !== '') {
+        return input.url
   } else {
-    return input
+        return '(No data)'
+  }
+    default:
+      return input.title
   }
 },
-setAttributes = async (el, a) => {
-  let aNames = Object.getOwnPropertyNames(a)
-  aNames.forEach((item, index) => {
-    el.setAttribute(aNames[index], a[aNames[index]])
+setAttributes = async (el, atts, method = 'set') => {
+  let doAttr = (e, a = atts) => {
+    let attNames = Object.getOwnPropertyNames(a)
+    attNames.forEach((item, index) => {
+      switch (method) {
+        case 'set':
+          e.setAttribute(attNames[index], a[attNames[index]])
+          break
+        case 'remove':
+          e.removeAttribute(atts[index])
+          break
+        default:
+          console.error(`invalid method for setAttributes: '${method}'`)
+      }
   })
+}
+  if (el.length) {
+    // if el is an array instead of a single NodeObject, handle it appropriately
+    if (atts.length) {
+      el.forEach((item, index) => {
+        doAttr(item, atts[index])
+      })
+    } else {
+      el.forEach((item, index) => {
+        doAttr(item)
+  })
+    }
+  } else {
+    doAttr(el)
+  }
 },
 makeTree = async (item, parent = tree) => {
   let parentEl = document.querySelector(`[data-id="${parent.id}"]`),
@@ -28,12 +59,13 @@ makeTree = async (item, parent = tree) => {
     }
     let el = document.createElement(elType),
     elChild = document.createElement('span')
-    setAttributes(el, { "class":`item ${i.type}`, "data-id":i.id })
-    setAttributes(elChild, { "class":"title" })
+    setAttributes([el, elChild],
+      [{ 'class':`item ${i.type}`, 'data-id':i.id },
+      { 'class':'title' }])
     if (i.type === 'bookmark') {
-      setAttributes(el, { "title":i.url, "data-title":checkTitle(i.title) })
+      setAttributes(el, { 'title':i.url, 'data-title':checkTitle(i) })
     }
-    elChild.appendChild(document.createTextNode(`${checkTitle(i.title)}`))
+    elChild.appendChild(document.createTextNode(`${checkTitle(i)}`))
     el.appendChild(elChild)
     return el
   }
@@ -67,14 +99,15 @@ makeTree = async (item, parent = tree) => {
 openPopup = async (obj) => {
   browser.storage.sync.get().then((result) => {
     savedNotes = result.notes || {}
-    if (storedNotes[obj.id]) {
+    if (savedNotes[obj.id]) {
       document.querySelector('#note-input').value = savedNotes[obj.id]
     }
   })
-  document.body.setAttribute('popup-opened','true')
-  popup.element.setAttribute('data-open-id', obj.id)
-  popupTitle.setAttribute('title', obj.title)
-  setAttributes(popupUrl, { 'title':obj.url, 'href':obj.url })
+  setAttributes([document.body, popup.element, popupTitle, popupUrl],
+    [{ 'popup-opened':'true' },
+    { 'data-open-id':obj.id },
+    { 'title':obj.title },
+    { 'title':obj.url, 'href':obj.url}])
   document.querySelector('#note-input').focus()
 },
 closePopup = async (method, event) => {
@@ -87,8 +120,7 @@ closePopup = async (method, event) => {
       console.log(notes)
       browser.storage.sync.set({ notes })
     case 'cancel':
-      document.body.removeAttribute('popup-opened')
-      popup.element.removeAttribute('data-open-id')
+      setAttributes([document.body, popup.element], ['popup-opened', 'data-open-id'], 'remove')
       document.querySelector('#note-input').value = ''
       break
     default:
