@@ -148,7 +148,7 @@ browser.runtime.onMessage.addListener((msg, sender, respond) => {
   switch (msg.type) {
     case 'bookmarkUpdate':
       panelInit(true)
-      respond({ type:'success', response:'*thumbs up emoji*' })
+      respond({ type:'log', response:'*thumbs up emoji*' })
       break
     default:
       respond({ type:'error', response:`unknown or missing message type: '${msg.type}'` })

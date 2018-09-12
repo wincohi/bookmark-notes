@@ -1,6 +1,6 @@
 var update = async (type = '') => {
   browser.runtime.sendMessage({ type:type }).then((msg) => {
-    console.log(msg.response)
+    console[type](msg.response)
   }, (err) => {
     console.error(err)
   })
