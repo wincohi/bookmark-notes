@@ -15,7 +15,7 @@ ul{
   list-style-type:none;
   padding-left:.5em;
   margin:.5em 0 .5em .7em;
-  border:solid hsla(240,5%,50%,.25);
+  border:solid hsla(240,5%,50%,.3);
   border-width:0 0 0 1px;
 }
 #tree{
@@ -25,13 +25,17 @@ ul{
   margin-left:0;
 }
 ul:hover{
-  border-color:hsla(240,5%,50%,.6);
+  border-color:hsla(240,5%,50%,.7);
 }
 li{
   border-radius:2px;
   cursor:pointer;
   padding:2px 4px;
   border:1px solid transparent;
+}
+li:not(:last-child){
+  border-block-end:1px solid hsla(240,5%,50%,.20);
+  margin-block-end:-1px;
 }
 .title{
   display:block;
@@ -74,7 +78,7 @@ ul>.title:hover{
   opacity:.8;
 }
 li:hover{
-  border-color:hsla(240,5%,50%,.20);
+  border-color:hsla(240,5%,50%,.25);
   background-color:-moz-buttonhoverface;
 }
 #popup-bg{
