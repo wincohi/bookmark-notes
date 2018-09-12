@@ -2,6 +2,6 @@
 
 This extension was built in a day.
 
-### [Download & install from AMO.][amo]
+<u>[Download & install from AMO][amo]</u>
 
 [amo]: https://addons.mozilla.org/en-US/firefox/addon/bookmark-notes/
