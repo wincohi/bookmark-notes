@@ -22,9 +22,9 @@ var checkTitle = (input = { title:'', url:'' }) => {
     case undefined:
       if (input.url && input.url !== '') {
         return input.url
-  } else {
+      } else {
         return '(No data)'
-  }
+      }
     default:
       return input.title
   }
@@ -160,11 +160,14 @@ expandCollapse = async (tgt) => {
   tgt.classList.toggle('collapsed')
   switch (collEl.length) {
     case 0:
+      /* if there are no collapsed elements, but there are
+       * still folder IDs in collapsedFolders, remove them all */
       if (collapsedFolders !== []) {
         newColl = []
       }
       break
     default:
+      // add new items to storage, and remove old ones
       collEl.forEach((item, index, arr) => {
         if (!collapsedFolders.includes(item)) {
           newColl.push(item)
@@ -176,7 +179,6 @@ expandCollapse = async (tgt) => {
         }
       })
   }
-  console.log('done')
   collapsedFolders = newColl
   browser.storage.local.set({ collapsed:newColl })
 },
