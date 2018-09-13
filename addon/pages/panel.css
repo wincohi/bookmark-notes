@@ -81,6 +81,15 @@ li:hover{
   border-color:hsla(240,5%,50%,.25);
   background-color:-moz-buttonhoverface;
 }
+li.separator{
+  background:linear-gradient(to bottom, transparent, transparent 50%, hsla(240,5%,50%,.4) 50%, hsla(240,5%,50%,.4) calc(50% + 2px), transparent calc(50% + 2px), transparent);
+  border:none;
+  border-block-end:none;
+  pointer-events:none;
+}
+li.separator>.title{
+  visibility:hidden;
+}
 #popup-bg{
   position:fixed;
   top:0;
