@@ -1,4 +1,4 @@
-var tree = { id:'_root', children:[] },
+var tree = { id:'root________', children:[] },
     savedNotes,
     collapsedFolders,
     popup = { element:document.querySelector('#popup-bg') },
