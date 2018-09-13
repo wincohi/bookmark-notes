@@ -35,5 +35,10 @@
     "default_title":"Bookmark Notes",
     "default_panel":"pages/panel.html",
     "default_icon":"img/icon.png"
+  },
+
+  "options_ui":{
+    "browser_style":true,
+    "page":"pages/options.html"
   }
 }
