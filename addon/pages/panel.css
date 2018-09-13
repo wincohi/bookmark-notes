@@ -54,7 +54,6 @@ ul>.title{
   font-weight:bolder;
   margin:0 0 .25em -.7em;
   background-color:-moz-field;
-  font-size:1.13em;
   cursor:pointer;
   transition:opacity .15s var(--quantum-timing-func)
 }
@@ -66,9 +65,9 @@ ul.collapsed,
 #tree>ul.collapsed{
   margin-left:-.5em;
   margin-right:-.5em;
-  height:1.79em;
+  height:1.66em;
   overflow-y:hidden;
-  border-width:0 0 1px 0;
+  border-width:0;
 }
 ul.collapsed>.title{
   opacity:.7;
