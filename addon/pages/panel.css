@@ -82,10 +82,11 @@ li:hover{
   background-color:-moz-buttonhoverface;
 }
 li.separator{
-  background:linear-gradient(to bottom, transparent, transparent 50%, hsla(240,5%,50%,.4) 50%, hsla(240,5%,50%,.4) calc(50% + 2px), transparent calc(50% + 2px), transparent);
+  background:linear-gradient(to bottom, transparent, transparent calc(50% - 1px), hsla(240,5%,50%,.8) calc(50% - 1px), hsla(240,5%,50%,.8) calc(50% + 1px), transparent calc(50% + 1px), transparent);
   border:none;
   border-block-end:none;
   pointer-events:none;
+  height:1em;
 }
 li.separator>.title{
   visibility:hidden;
