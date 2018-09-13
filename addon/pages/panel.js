@@ -87,20 +87,25 @@ makeTemplate = async (i) => {
     }
   }
   elChild.appendChild(document.createTextNode(`${checkTitle(i)}`))
-  if (i.type === 'bookmark') {
-    setParams[1].title = i.url
-    setParams[1]['data-title'] = checkTitle(i)
-    handleFunc = openPopup
-    handleParams = { title:i.title, url:i.url, id:i.id }
-  }
-  if (i.type === 'folder') {
-    elType = 'ul'
-    handleFunc = expandCollapse
-    handleParams = i.id
-    elTarget.v = 1
-    if (isCollapsed(i.id)) {
-      setParams[0].class += ' collapsed'
-    }
+  switch (i.type) {
+    case 'bookmark':
+      setParams[1].title = i.url
+      setParams[1]['data-title'] = checkTitle(i)
+      handleFunc = openPopup
+      handleParams = { title:i.title, url:i.url, id:i.id }
+    break
+    case 'folder':
+      elType = 'ul'
+      handleFunc = expandCollapse
+      handleParams = i.id
+      elTarget.v = 1
+      if (isCollapsed(i.id)) {
+        setParams[0].class += ' collapsed'
+      }
+    break
+    default:
+      // do nothing
+    break
   }
   el = document.createElement(elType)
   elTarget.arr = [el, elChild]
