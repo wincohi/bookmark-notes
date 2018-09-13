@@ -37,15 +37,15 @@ setAttributes = async (el, atts, method = 'set') => {
       switch (method) {
         case 'set':
           e.setAttribute(attNames[index], a[attNames[index]])
-          break
+        break
         case 'remove':
           e.removeAttribute(atts[index])
-          break
+        break
         default:
           console.error(`invalid method for setAttributes: '${method}'`)
       }
-  })
-}
+    })
+  }
   if (el.length) {
     // if el is an array instead of a single NodeObject, handle it appropriately
     if (atts.length) {
@@ -67,61 +67,63 @@ getAttributes = (input, attr) => {
     output.push(item.getAttribute(attr))
   })
   return output
-}
-makeTree = async (item, parent = tree) => {
-  let parentEl = document.querySelector(`[data-id="${parent.id}"]`),
-  mkTemplate = (i) => {
-    let elType = 'li',
-    isCollapsed = (id) => {
-      if (collapsedFolders.length !== 0 && collapsedFolders.includes(id)) {
-        return true
-      } else {
-        return false
-      }
-    }
-    if (i.type === 'folder') {
-      elType = 'ul'
-    }
-    let el = document.createElement(elType),
-    elChild = document.createElement('span')
-    setAttributes([el, elChild],
-      [{ 'class':`item ${i.type}`, 'data-id':i.id },
-      { 'class':'title' }])
-    if (i.type === 'bookmark') {
-      setAttributes(el, { 'title':i.url, 'data-title':checkTitle(i) })
+},
+makeTemplate = async (i) => {
+  let elType = 'li',
+  handleFunc,
+  handleParams,
+  setParams = [{ 'data-id':i.id, 'class':'item' }, { 'class':'title' }],
+  el,
+  elChild = document.createElement('span'),
+  elTarget = {
+    arr:[],
+    v:0
+  },
+  isCollapsed = (id) => {
+    if (collapsedFolders.length !== 0 && collapsedFolders.includes(id)) {
+      return true
     } else {
-      if (isCollapsed(i.id)) {
-        el.classList.add('collapsed')
-      }
+      return false
     }
-    elChild.appendChild(document.createTextNode(`${checkTitle(i)}`))
-    el.appendChild(elChild)
-    return el
   }
-  if (item.url) {
-    // if the item has a URL, it's a bookmark; otherwise, it's a folder or separator
-    let bookmark = {
-      title: item.title,
-      url: item.url,
-      id: item.id,
-      type: 'bookmark'
+  elChild.appendChild(document.createTextNode(`${checkTitle(i)}`))
+  if (i.type === 'bookmark') {
+    setParams[1].title = i.url
+    setParams[1]['data-title'] = checkTitle(i)
+    handleFunc = openPopup
+    handleParams = { title:i.title, url:i.url, id:i.id }
+  }
+  if (i.type === 'folder') {
+    elType = 'ul'
+    handleFunc = expandCollapse
+    handleParams = i.id
+    elTarget.v = 1
+    if (isCollapsed(i.id)) {
+      setParams[0].class += ' collapsed'
     }
-    parentEl.appendChild(mkTemplate(bookmark))
-    parent.children.push(bookmark)
-  } else if (item.children) {
-    let folder = {
-      title: item.title,
-      id: item.id,
-      type: 'folder',
-      children: []
-    }
-    parentEl.appendChild(mkTemplate(folder))
-    parent.children.push(folder)
+  }
+  el = document.createElement(elType)
+  elTarget.arr = [el, elChild]
+  el.appendChild(elChild)
+  setParams[0].class += ` ${i.type}`
+  setAttributes([el, elChild], setParams)
+  if (i.type !== 'separator') {
+    addListeners('click', elTarget.arr[elTarget.v], handleFunc, handleParams)
+  }
+  return el
+},
+addListeners = async (event = '', element, func, params) => {
+  element.addEventListener(event, (ev) => {
+    func(params, ev)
+  })
+},
+makeTree = async (item, parent = tree) => {
+  let parentEl = document.querySelector(`[data-id="${parent.id}"]`)
+  parentEl.appendChild(await makeTemplate(item))
+  if (item.children) {
     for (child of item.children) {
       // we iterate on this function for each child of the folder
-      makeTree(child, parent.children.find((el) => {
-        return el.id === item.id
-      }))
+      await makeTree(child, parent.children.find(el => el.id === item.id))
     }
   }
 },
@@ -153,7 +155,8 @@ closePopup = async (method, event) => {
       console.error(`unknown popup handling method: ${method}`)
   }
 },
-expandCollapse = async () => {
+expandCollapse = async (elId, ev) => {
+  ev.currentTarget.parentElement.classList.toggle('collapsed')
   let collEl = getAttributes(document.querySelectorAll('.collapsed'), 'data-id'),
   newColl = collapsedFolders || []
   switch (collEl.length) {
@@ -178,48 +181,28 @@ expandCollapse = async () => {
       })
   }
   collapsedFolders = newColl
-  browser.storage.local.set({ collapsed:newColl }).then((res) => {
-    console.log(newColl)
-  })
+  browser.storage.local.set({ collapsed:newColl })
 },
-panelInit = async (isReload = false, bkmkObject) => {
-  let addListeners = async () => {
-    if (!isReload) {
-      // we don't need to add listeners to Save & Cancel buttons if we already have, so don't
-      document.querySelector('#popup-buttons>.button.cancel').addEventListener('click', (ev) => {
-        closePopup('cancel', ev)
-      })
-      document.querySelector('#popup-buttons>.button.save').addEventListener('click', (ev) => {
-        closePopup('save', ev)
-      })
-    }
-    document.querySelectorAll('li.bookmark').forEach((el, i, arr) => {
-      el.addEventListener('click', (ev) => {
-        openPopup({
-          title: ev.currentTarget.getAttribute('data-title'),
-          url: ev.currentTarget.getAttribute('title'),
-          id: ev.currentTarget.getAttribute('data-id')
-        })
-      })
+panelInit = async (isReload = false) => {
+  if (!isReload) {
+    // we don't need to add listeners to Save & Cancel buttons if we already have, so don't
+    document.querySelector('#popup-buttons>.button.cancel').addEventListener('click', (ev) => {
+      closePopup('cancel', ev)
     })
-    document.querySelectorAll('ul>.title').forEach((el, i, arr) => {
-      el.addEventListener('click', (ev) => {
-        ev.currentTarget.parentNode.classList.toggle('collapsed')
-        expandCollapse()
-      })
+    document.querySelector('#popup-buttons>.button.save').addEventListener('click', (ev) => {
+      closePopup('save', ev)
     })
-  }
-  if (isReload) {
+  } else {
     // clear the tree if we're reloading the bookmarks from scratch
     document.querySelector('#tree').innerHTML = ''
   }
-  browser.bookmarks.getTree().then((bkm) => {
-    bkm[0].children.forEach((b, i, arr) => {
-      makeTree(b)
-    })
-    addListeners()
+  await browser.bookmarks.getTree().then((res) => {
+    tree = res[0]
   }, (err) => {
-    console.error(`error getting bookmarks: ${err}`)
+    console.error(`error getting bookmarks: '${err}'`)
+  })
+  tree.children.forEach((b, i, arr) => {
+    makeTree(b)
   })
 }
 
