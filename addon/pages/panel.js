@@ -1,5 +1,5 @@
 var tree = { id:'root________', children:[] },
-    savedNotes,
+    notes,
     collapsedFolders,
     popup = { element:document.querySelector('#popup-bg') },
     popupTitle = document.querySelector('#popup-title'),
@@ -12,7 +12,7 @@ browser.storage.local.get('collapsed').then((res) => {
   console.error(`error getting local storage: '${err}'`)
 })
 browser.storage.sync.get('notes').then((res) => {
-  savedNotes = res.notes || {}
+  notes = res.notes || {}
 }, (err) => {
   console.error(`error getting synced notes: '${err}`)
 })
@@ -127,9 +127,9 @@ makeTree = async (item, parent = tree) => {
 },
 openPopup = async (obj) => {
   browser.storage.sync.get('notes').then((res) => {
-    savedNotes = res.notes || {}
-    if (savedNotes[obj.id]) {
-      document.querySelector('#note-input').value = savedNotes[obj.id]
+    notes = res.notes || {}
+    if (notes[obj.id]) {
+      document.querySelector('#note-input').value = notes[obj.id]
     }
   })
   setAttributes([document.body, popup.element, popupTitle, popupUrl],
@@ -143,9 +143,7 @@ closePopup = async (method, event) => {
   popup.id = popup.element.getAttribute('data-open-id')
   switch (method) {
     case 'save':
-      savedNotes[popup.id] = document.querySelector('#note-input').value
-      let notes = savedNotes
-      console.log(notes)
+      notes[popup.id] = document.querySelector('#note-input').value
       browser.storage.sync.set({ notes })
     case 'cancel':
       setAttributes([document.body, popup.element], ['popup-opened', 'data-open-id'], 'remove')
