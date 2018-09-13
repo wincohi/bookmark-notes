@@ -32,10 +32,18 @@ li{
   cursor:pointer;
   padding:2px 4px;
   border:1px solid transparent;
+  border-block-start:1px solid transparent;
+  margin-block-start:-1px;
 }
-li:not(:last-child){
-  border-block-end:1px solid hsla(240,5%,50%,.20);
-  margin-block-end:-1px;
+li:not(:first-child):not(:nth-child(2)){
+  border-block-start-color:hsla(240,5%,50%,.20);
+}
+.title+li,
+.separator+li,
+li:hover,
+li:hover+li,
+ul+li{
+  border-block-start-color:transparent!important;
 }
 .title{
   display:block;
