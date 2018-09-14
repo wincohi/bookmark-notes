@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="options.css">
+</head>
+
+<body>
+
+  <div id="options">
+    <h3>Options</h3>
+    <form id="visual-options">
+      <div class="opt-group"><input type="checkbox" name="start_collapsed" id="start-collapsed" checked> <label for="start-collapsed">Folders start collapsed</label></div>
+      <div class="opt-group"><input type="checkbox" name="inline_notes" id="inline-notes"> <label for="inline-notes">Display &amp; edit notes inline (no popup)</label></div>
+      <div class="opt-group"><input type="checkbox" name="compact_mode" id="compact-mode"> <label for="compact-mode">Compact design mode (less whitespace, more content)</label></div>
+      <div class="opt-group"><input type="checkbox" name="double_click_open" id="double-click-open"> <label for="double-click-open">Launch bookmarks with double-click</label></div>
+    </form>
+    <h3>Import</h3>
+    <form id="import-types">
+      <div class="opt-group"><input type="checkbox" name="import_notes" id="import-notes"> <label for="import-notes">Notes</label></div>
+      <div class="opt-group indent"><input disabled type="checkbox" name="replace_current" id="replace-current"> <label for="import-notes">Overwrite current notes</label></div>
+      <div class="description indent">If selected, any imported notes that conflict with existing ones will be replaced.</div>
+      <div class="opt-group"><input type="checkbox" name="import_favicons" id="import-favicons"> <label for="import-favicons">Favicons</label></div>
+      <input type="file" id="import-element"></input><button id="import-file-select">Import selected</button>
+    </form>
+  </div>
+
+  <script src="options.js"></script>
+
+</body>
+
+</html>
