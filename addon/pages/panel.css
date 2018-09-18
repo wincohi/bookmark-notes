@@ -47,7 +47,7 @@ ul+li{
 }
 .title{
   display:flex;
-  align-items:center;
+  align-items:top;
   overflow-wrap:break-word;
   max-width:100%;
 }
@@ -101,8 +101,9 @@ li.separator>.title{
   visibility:hidden;
 }
 .favicon{
-  max-height:1.13em;
-  margin-right:.25em;
+  height:1.13em;
+  width:1.13em;
+  margin:.15em .25em 0 0;
 }
 #popup-bg{
   position:fixed;
