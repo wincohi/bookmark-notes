@@ -104,7 +104,7 @@ makeTemplate = async (i) => {
       }
     break
     default:
-      // do nothing
+      // nothing to see here, go home
     break
   }
   el = document.createElement(elType)
