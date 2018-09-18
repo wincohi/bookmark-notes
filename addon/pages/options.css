@@ -1,3 +1,7 @@
+.hidden,
+#import-frame{
+  display:none!important;
+}
 input[type='checkbox']{
   height:1.5em
 }
@@ -11,7 +15,7 @@ form{
   display:flex;
   align-items:center;
 }
-.opt-group:hover{
+.opt-group:not(.file-select):hover{
   background-color:hsla(240,5%,50%,.07);
 }
 .opt-group>label{
@@ -25,9 +29,6 @@ form{
   opacity:.7;
   padding-left:2em;
 }
-#import-element{
-  display:none;
-}
-#import-file-select{
-  margin-top:.35em;
+.file-select{
+  margin-top:.5em;
 }
