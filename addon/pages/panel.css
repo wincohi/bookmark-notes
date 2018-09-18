@@ -46,7 +46,8 @@ ul+li{
   border-block-start-color:transparent!important;
 }
 .title{
-  display:block;
+  display:flex;
+  align-items:center;
   overflow-wrap:break-word;
   max-width:100%;
 }
@@ -98,6 +99,10 @@ li.separator{
 }
 li.separator>.title{
   visibility:hidden;
+}
+.favicon{
+  max-height:1.13em;
+  margin-right:.25em;
 }
 #popup-bg{
   position:fixed;
@@ -159,6 +164,9 @@ li.separator>.title{
   padding:0 .5em;
   height:100%;
   box-shadow:0 1px 4px hsla(240,5%,5%,.07);
+}
+#note-input:focus{
+  border-color:Highlight;
 }
 body:not([popup-opened]) #popup-bg{
   opacity:0;

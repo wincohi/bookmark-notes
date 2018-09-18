@@ -1,12 +1,13 @@
 const defaultOptions = {
   startCollapsed:1,
+  showFavicons:0,
   displayInlineNotes:0,
   compactMode:0,
   launchWithDoubleClick:0
 }
 var update = async (type = '') => {
   browser.runtime.sendMessage({ type:type }).then((msg) => {
-    console[type](msg.response)
+    console[msg.type](msg.response)
   }, (err) => {
     console.error(err)
   })
@@ -36,6 +37,7 @@ loadOptions = () => {
   browser.storage.local.get().then((res) => {
     if (res.options && !checkDefaults(res.options)) {
       options.startCollapsed = res.options.startCollapsed
+      options.showFavicons = res.options.showFavicons
       options.displayInlineNotes = res.options.displayInlineNotes
       options.compactMode = res.options.compactMode
       options.launchWithDoubleClick = res.options.launchWithDoubleClick

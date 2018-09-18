@@ -1,11 +1,19 @@
+const defaultOptions = {
+  startCollapsed:1,
+  showFavicons:0,
+  displayInlineNotes:0,
+  compactMode:0,
+  launchWithDoubleClick:0
+}
 var tree = { id:'root________', children:[] },
     notes,
     collapsedFolders = [],
     openedFolders = [],
+    favicons = {},
     popup = { element:document.querySelector('#popup-bg') },
     popupTitle = document.querySelector('#popup-title'),
     popupUrl = document.querySelector('#popup-url'),
-    options = {},
+    options = defaultOptions,
     bookmarkLaunching = false,
     timerId
 
@@ -19,10 +27,9 @@ browser.storage.local.get().then((res) => {
   }
   if (res.options) {
     options = res.options
-  } else {
-    browser.runtime.getBackgroundPage().then((w) => {
-      options = w.defaultOptions
-    })
+  }
+  if (res.favicons) {
+    favicons = res.favicons
   }
 }, (err) => {
   console.error(`error getting local storage: '${err}'`)
@@ -90,6 +97,7 @@ makeTemplate = async (i) => {
   handleParams,
   setParams = [{ 'data-id':i.id, 'class':'item' }, { 'class':'title' }],
   el,
+  favicon = document.createElement('img'),
   elChild = document.createElement('span'),
   elTarget = {
     arr:[],
@@ -110,6 +118,13 @@ makeTemplate = async (i) => {
           return ''
         }
     }
+    }
+  if (options.showFavicons && favicons[i.id]) {
+    setAttributes(favicon, {
+      'src': favicons[i.id],
+      'class': 'favicon'
+    })
+    elChild.appendChild(favicon)
   }
   elChild.appendChild(document.createTextNode(`${checkTitle(i)}`))
   switch (i.type) {
@@ -280,8 +295,8 @@ panelInit()
 browser.runtime.onMessage.addListener((msg, sender, respond) => {
   switch (msg.type) {
     case 'reload':
-      panelInit(true)
       respond({ type:'log', response:'*thumbs up emoji*' })
+      panelInit(true)
       break
     default:
       respond({ type:'error', response:`unknown or missing message type: '${msg.type}'` })
@@ -290,5 +305,8 @@ browser.runtime.onMessage.addListener((msg, sender, respond) => {
 browser.storage.onChanged.addListener((change, area) => {
   if (area === 'sync') {
     notes = change.notes.newValue
+  }
+  if (area === 'local') {
+    options = change.options.newValue
   }
 })
