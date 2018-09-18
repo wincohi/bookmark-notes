@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="options.css">
+</head>
+
+<body>
+
+  <div id="options">
+    <h3>Options</h3>
+    <form id="visual-options">
+      <div class="opt-group"><input type="checkbox" name="startCollapsed" id="start-collapsed" checked> <label for="start-collapsed">Folders start collapsed</label></div>
+      <div class="opt-group hidden"><input type="checkbox" name="displayInlineNotes" id="inline-notes"> <label for="inline-notes">Display &amp; edit notes inline (no popup)</label></div>
+      <div class="opt-group hidden"><input type="checkbox" name="compactMode" id="compact-mode"> <label for="compact-mode">Compact design mode (less whitespace, more content)</label></div>
+      <div class="opt-group"><input type="checkbox" name="launchWithDoubleClick" id="double-click-open"> <label for="double-click-open">Launch bookmarks with double-click</label></div>
+    </form>
+    <h3>Import</h3>
+    <form id="import-types">
+      <div class="opt-group"><input type="checkbox" name="importNotes" id="import-notes" checked> <label for="import-notes">Notes</label></div>
+      <div class="opt-group indent"><input type="checkbox" name="replaceCurrentNotes" id="replace-current"> <label for="replace-current">Overwrite current notes</label></div>
+      <div class="description indent">If selected, any existing notes that conflict with imported ones will be replaced.</div>
+      <div class="opt-group hidden"><input type="checkbox" name="importFavicons" id="import-favicons"> <label for="import-favicons">Favicons</label></div>
+      <div class="opt-group file-select"><input type="file" accept="text/html" id="import-file-select"></input><button disabled id="import">Import</button></div>
+    </form>
+  </div>
+
+  <iframe id="import-frame" sandbox="allow-same-origin">
+    <!----------------------------------------------------------|
+    | bookmarks will be loaded here, since it's easier & faster |
+    | to read the DOM than to try to parse the file another way |
+    |----------------------------------------------------------->
+  </iframe>
+
+  <script src="options.js"></script>
+
+</body>
+
+</html>

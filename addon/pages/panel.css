@@ -32,10 +32,18 @@ li{
   cursor:pointer;
   padding:2px 4px;
   border:1px solid transparent;
+  border-block-start:1px solid transparent;
+  margin-block-start:-1px;
 }
-li:not(:last-child){
-  border-block-end:1px solid hsla(240,5%,50%,.20);
-  margin-block-end:-1px;
+li:not(:first-child):not(:nth-child(2)){
+  border-block-start-color:hsla(240,5%,50%,.20);
+}
+.title+li,
+.separator+li,
+li:hover,
+li:hover+li,
+ul+li{
+  border-block-start-color:transparent!important;
 }
 .title{
   display:block;
@@ -46,7 +54,6 @@ ul>.title{
   font-weight:bolder;
   margin:0 0 .25em -.7em;
   background-color:-moz-field;
-  font-size:1.13em;
   cursor:pointer;
   transition:opacity .15s var(--quantum-timing-func)
 }
@@ -58,9 +65,9 @@ ul.collapsed,
 #tree>ul.collapsed{
   margin-left:-.5em;
   margin-right:-.5em;
-  height:1.79em;
+  height:1.66em;
   overflow-y:hidden;
-  border-width:0 0 1px 0;
+  border-width:0;
 }
 ul.collapsed>.title{
   opacity:.7;
@@ -80,6 +87,17 @@ ul>.title:hover{
 li:hover{
   border-color:hsla(240,5%,50%,.25);
   background-color:-moz-buttonhoverface;
+}
+li.separator{
+  background:linear-gradient(to bottom, transparent, transparent calc(50% - 1px), currentcolor calc(50% - 1px), currentcolor calc(50% + 1px), transparent calc(50% + 1px), transparent);
+  border:none;
+  border-block-end:none;
+  pointer-events:none;
+  height:1em;
+  opacity:.65;
+}
+li.separator>.title{
+  visibility:hidden;
 }
 #popup-bg{
   position:fixed;
@@ -163,7 +181,6 @@ body:not([popup-opened]) #popup{
 }
 #popup-buttons>.button{
   font:-moz-button;
-  font-weight:bolder;
   background-color:-moz-buttonhoverface;
   flex:1;
   text-align:center;
