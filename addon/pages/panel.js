@@ -1,13 +1,29 @@
 var tree = { id:'root________', children:[] },
     notes,
-    collapsedFolders,
+    collapsedFolders = [],
+    openedFolders = [],
     popup = { element:document.querySelector('#popup-bg') },
     popupTitle = document.querySelector('#popup-title'),
-    popupUrl = document.querySelector('#popup-url')
+    popupUrl = document.querySelector('#popup-url'),
+    options = {},
+    bookmarkLaunching = false,
+    timerId
 
 // initial storage gets
-browser.storage.local.get('collapsed').then((res) => {
-  collapsedFolders = res.collapsed || []
+browser.storage.local.get().then((res) => {
+  if (res.collapsed) {
+    collapsedFolders = res.collapsed
+  }
+  if (res.opened) {
+    openedFolders = res.opened
+  }
+  if (res.options) {
+    options = res.options
+  } else {
+    browser.runtime.getBackgroundPage().then((w) => {
+      options = w.defaultOptions
+    })
+  }
 }, (err) => {
   console.error(`error getting local storage: '${err}'`)
 })
@@ -80,10 +96,19 @@ makeTemplate = async (i) => {
     v:0
   },
   isCollapsed = (id) => {
-    if (collapsedFolders.length !== 0 && collapsedFolders.includes(id)) {
-      return true
-    } else {
-      return false
+    switch (options.startCollapsed) {
+      case 1:
+        if (openedFolders.length !== 0 && openedFolders.includes(id)) {
+          return ''
+        } else {
+          return ' collapsed'
+        }
+      default:
+        if (collapsedFolders.length !== 0 && collapsedFolders.includes(id)) {
+          return ' collapsed'
+        } else {
+          return ''
+        }
     }
   }
   elChild.appendChild(document.createTextNode(`${checkTitle(i)}`))
@@ -99,9 +124,7 @@ makeTemplate = async (i) => {
       handleFunc = expandCollapse
       handleParams = i.id
       elTarget.v = 1
-      if (isCollapsed(i.id)) {
-        setParams[0].class += ' collapsed'
-      }
+      setParams[0].class += isCollapsed(i.id)
     break
     default:
       // nothing to see here, go home
@@ -133,29 +156,44 @@ makeTree = async (item, parent = tree) => {
   }
 },
 openPopup = async (obj) => {
-  browser.storage.sync.get('notes').then((res) => {
-    notes = res.notes || {}
+  let delayedOpen = () => {
     if (notes[obj.id]) {
       document.querySelector('#note-input').value = notes[obj.id]
     }
-  })
-  setAttributes([document.body, popup.element, popupTitle, popupUrl],
-    [{ 'popup-opened':'true' },
-    { 'data-open-id':obj.id },
-    { 'title':obj.title },
-    { 'title':obj.url, 'href':obj.url}])
-  document.querySelector('#note-input').focus()
+    setAttributes([document.body, popup.element, popupTitle, popupUrl],
+      [{ 'popup-opened': 'true' },
+      { 'data-open-id': obj.id },
+      { 'title': obj.title },
+      { 'title': obj.url, 'href': obj.url }])
+    document.querySelector('#note-input').focus()
+    bookmarkLaunching = false
+  },
+  launchBookmark = () => {
+    window.clearTimeout(timerId)
+    window.open(obj.url)
+  }
+  if (options.launchWithDoubleClick) {
+    if (!bookmarkLaunching) {
+      timerId = window.setTimeout(delayedOpen, 200)
+      bookmarkLaunching = true
+    } else {
+      launchBookmark()
+      bookmarkLaunching = false
+    }
+  } else {
+    delayedOpen()
+  }
 },
-closePopup = async (method, event) => {
+closePopup = async (method) => {
   popup.id = popup.element.getAttribute('data-open-id')
   switch (method) {
     case 'save':
       notes[popup.id] = document.querySelector('#note-input').value
-      browser.storage.sync.set({ notes })
+      browser.storage.sync.set({ notes:notes })
     case 'cancel':
       setAttributes([document.body, popup.element], ['popup-opened', 'data-open-id'], 'remove')
       document.querySelector('#note-input').value = ''
-      break
+    break
     default:
       console.error(`unknown popup handling method: ${method}`)
   }
@@ -163,30 +201,54 @@ closePopup = async (method, event) => {
 expandCollapse = async (elId, ev) => {
   ev.currentTarget.parentElement.classList.toggle('collapsed')
   let collEl = getAttributes(document.querySelectorAll('.collapsed'), 'data-id'),
-  newColl = collapsedFolders || []
-  switch (collEl.length) {
-    case 0:
-      /* if there are no collapsed elements, but there are
-       * still folder IDs in collapsedFolders, remove them all */
-      if (collapsedFolders !== []) {
-        newColl = []
-      }
-      break
-    default:
-      // add new items to storage, and remove old ones
-      collEl.forEach((item, index, arr) => {
-        if (!collapsedFolders.includes(item)) {
-          newColl.push(item)
+  openEl = getAttributes(document.querySelectorAll('.folder:not(.collapsed)'), 'data-id'),
+  newColl = collapsedFolders || [],
+  newOpen = openedFolders || []
+  if (options.startCollapsed) {
+    switch (collEl.length) {
+      case 0:
+        /* if there are no open elements, but there are
+        * still folder IDs in openedFolders, remove them all */
+        if (openedFolders !== []) {
+          newOpen = []
         }
-      })
-      collapsedFolders.forEach((item, index, arr) => {
-        if (!collEl.includes(item)) {
-          newColl.splice(newColl.indexOf(item), 1)
+        break
+      default:
+        // add new items to storage, and remove old ones
+        openEl.forEach((item, index, arr) => {
+          if (!openedFolders.includes(item)) {
+            newOpen.push(item)
+          }
+        })
+        openedFolders.forEach((item, index, arr) => {
+          if (!openEl.includes(item)) {
+            newOpen.splice(newOpen.indexOf(item), 1)
+          }
+        })
+    }
+    openedFolders = newOpen
+  } else {
+    switch (collEl.length) {
+      case 0:
+        if (collapsedFolders !== []) {
+          newColl = []
         }
-      })
+        break
+      default:
+        collEl.forEach((item, index, arr) => {
+          if (!collapsedFolders.includes(item)) {
+            newColl.push(item)
+          }
+        })
+        collapsedFolders.forEach((item, index, arr) => {
+          if (!collEl.includes(item)) {
+            newColl.splice(newColl.indexOf(item), 1)
+          }
+        })
+    }
+    collapsedFolders = newColl
   }
-  collapsedFolders = newColl
-  browser.storage.local.set({ collapsed:newColl })
+  browser.storage.local.set({ collapsed:newColl, opened:newOpen, options:options })
 },
 panelInit = async (isReload = false) => {
   if (!isReload) {
@@ -217,11 +279,16 @@ panelInit()
 
 browser.runtime.onMessage.addListener((msg, sender, respond) => {
   switch (msg.type) {
-    case 'bookmarkUpdate':
+    case 'reload':
       panelInit(true)
       respond({ type:'log', response:'*thumbs up emoji*' })
       break
     default:
       respond({ type:'error', response:`unknown or missing message type: '${msg.type}'` })
+  }
+})
+browser.storage.onChanged.addListener((change, area) => {
+  if (area === 'sync') {
+    notes = change.notes.newValue
   }
 })
