@@ -31,16 +31,18 @@ checkDefaults = (opt) => {
   } else {
     return true
   }
+},
+loadOptions = () => {
+  browser.storage.local.get().then((res) => {
+    if (res.options && !checkDefaults(res.options)) {
+      options.startCollapsed = res.options.startCollapsed
+      options.displayInlineNotes = res.options.displayInlineNotes
+      options.compactMode = res.options.compactMode
+      options.launchWithDoubleClick = res.options.launchWithDoubleClick
+    }
+  })
 }
-
-browser.storage.local.get().then((res) => {
-  if (res.options && !checkDefaults(res.options)) {
-    options.startCollapsed = res.options.startCollapsed
-    options.displayInlineNotes = res.options.displayInlineNotes
-    options.compactMode = res.options.compactMode
-    options.launchWithDoubleClick = res.options.launchWithDoubleClick
-  }
-})
+loadOptions()
 
 eventTgts.forEach((tgt, i, arr) => {
   tgt.addListener(() => {
@@ -49,4 +51,9 @@ eventTgts.forEach((tgt, i, arr) => {
 })
 browser.browserAction.onClicked.addListener((tab) => {
   browser.sidebarAction.open()
+})
+browser.storage.onChanged.addListener((change, area) => {
+  if (area === 'local') {
+    loadOptions()
+  }
 })
