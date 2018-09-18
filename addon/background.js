@@ -1,3 +1,9 @@
+const defaultOptions = {
+  startCollapsed:1,
+  displayInlineNotes:0,
+  compactMode:0,
+  launchWithDoubleClick:0
+}
 var update = async (type = '') => {
   browser.runtime.sendMessage({ type:type }).then((msg) => {
     console[type](msg.response)
