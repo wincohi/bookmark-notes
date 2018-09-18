@@ -120,7 +120,7 @@ makeTemplate = async (i) => {
     }
     }
   if (options.showFavicons && favicons[i.id]) {
-    setAttributes(favicon, {
+    await setAttributes(favicon, {
       'src': favicons[i.id],
       'class': 'favicon'
     })
