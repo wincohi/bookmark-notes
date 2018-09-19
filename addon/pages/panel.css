@@ -71,9 +71,10 @@ ul.collapsed,
 #tree>ul.collapsed{
   margin-left:-.5em;
   margin-right:-.5em;
-  height:1.66em;
-  overflow-y:hidden;
-  border-width:0;
+  border-color:transparent;
+}
+ul.collapsed>li{
+  display:none;
 }
 ul.collapsed>.title{
   opacity:.7;
