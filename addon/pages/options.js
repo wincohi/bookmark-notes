@@ -139,11 +139,15 @@ optionsElements.import.element.addEventListener('change', (ev) => {
       items.forEach((item, i, arr) => {
         let description = item.nextSibling,
         bookmarkElement = item.querySelector('a')
+        if (invalidSchemes.test(bookmarkElement.getAttribute('href'))) {
+          console.log(`caught invalid URL expression: ${bookmarkElement.getAttribute('href')}`)
+        } else {
         if (description && description.nodeName === 'DD') {
           searchBookmarks({ url:bookmarkElement.getAttribute('href') }, 'notes', description)
         }
         if (bookmarkElement.getAttribute('icon')) {
           searchBookmarks({ url:bookmarkElement.getAttribute('href') }, 'favicons', bookmarkElement)
+        }
         }
       })
     }
