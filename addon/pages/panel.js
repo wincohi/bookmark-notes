@@ -1,6 +1,7 @@
 const defaultOptions = {
   startCollapsed:1,
   showFavicons:0,
+  showFaviconPlaceholder:1,
   displayInlineNotes:0,
   compactMode:0,
   launchWithDoubleClick:0
@@ -140,12 +141,26 @@ makeTemplate = async (i) => {
   }
   el = document.createElement(elType)
   elTarget.arr = [el, elChild]
-  if (options.showFavicons && i.type === 'bookmark') {
+  if (options.showFavicons) {
+    switch (favicons[i.id]) {
+      case undefined:
+        if (options.showFaviconPlaceholder && i.type === 'bookmark') {
     await setAttributes(favicon, {
-      'src': favicons[i.id] || '/img/default.svg',
+            'src': '/img/default.svg',
       'class': 'favicon'
     })
+          setParams[0].class += ' has-favicon'
+          el.appendChild(favicon)
+        }
+      break
+      default:
+        await setAttributes(favicon, {
+          'src':favicons[i.id],
+          'class':'favicon'
+        })
+        setParams[0].class += ' has-favicon'
     el.appendChild(favicon)
+  }
   }
   el.appendChild(elChild)
   setParams[0].class += ` ${i.type}`

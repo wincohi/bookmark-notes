@@ -1,6 +1,7 @@
 const defaultOptions = {
   startCollapsed:1,
   showFavicons:0,
+  showFaviconPlaceholder:1,
   displayInlineNotes:0,
   compactMode:0,
   launchWithDoubleClick:0
@@ -9,6 +10,7 @@ var currentOptions = defaultOptions,
 optionsElements = {
   startCollapsed:document.querySelector('#start-collapsed'),
   showFavicons:document.querySelector('#show-favicons'),
+  showFaviconPlaceholder:document.querySelector('#show-favicon-placeholder'),
   displayInlineNotes:document.querySelector('#inline-notes'),
   compactMode:document.querySelector('#compact-mode'),
   launchWithDoubleClick:document.querySelector('#double-click-open'),
@@ -67,6 +69,7 @@ sendMsg = async (msg) => browser.runtime.sendMessage(msg)
 optionsElements.all = [
   optionsElements.startCollapsed,
   optionsElements.showFavicons,
+  optionsElements.showFaviconPlaceholder,
   optionsElements.displayInlineNotes,
   optionsElements.compactMode,
   optionsElements.launchWithDoubleClick
