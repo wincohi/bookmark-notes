@@ -34,6 +34,9 @@ li{
   border:1px solid transparent;
   border-block-start:1px solid transparent;
   margin-block-start:-1px;
+  display:flex;
+  align-items:start;
+  overflow-x:hidden;
 }
 li:not(:first-child):not(:nth-child(2)){
   border-block-start-color:hsla(240,5%,50%,.20);
@@ -46,9 +49,12 @@ ul+li{
   border-block-start-color:transparent!important;
 }
 .title{
-  display:block;
+  display:inline;
   overflow-wrap:break-word;
   max-width:100%;
+}
+.has-favicon>.title{
+  max-width:calc(100% - 1.15em);
 }
 ul>.title{
   font-weight:bolder;
@@ -84,6 +90,9 @@ ul>ul.collapsed{
 ul>.title:hover{
   opacity:.8;
 }
+ul.collapsed>li{
+  pointer-events:none;
+}
 li:hover{
   border-color:hsla(240,5%,50%,.25);
   background-color:-moz-buttonhoverface;
@@ -98,6 +107,11 @@ li.separator{
 }
 li.separator>.title{
   visibility:hidden;
+}
+.favicon{
+  height:1.13em;
+  width:1.13em;
+  margin:.15em .25em 0 0;
 }
 #popup-bg{
   position:fixed;
@@ -159,6 +173,9 @@ li.separator>.title{
   padding:0 .5em;
   height:100%;
   box-shadow:0 1px 4px hsla(240,5%,5%,.07);
+}
+#note-input:focus{
+  border-color:Highlight;
 }
 body:not([popup-opened]) #popup-bg{
   opacity:0;

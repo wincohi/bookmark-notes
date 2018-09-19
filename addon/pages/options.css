@@ -29,6 +29,16 @@ form{
   opacity:.7;
   padding-left:2em;
 }
+.description.inline{
+  padding-left:0;
+}
 .file-select{
   margin-top:.5em;
+}
+a{
+  color:-moz-hyperlinktext;
+  text-decoration:none;
+}
+a:hover{
+  text-decoration:underline;
 }

@@ -1,12 +1,14 @@
 const defaultOptions = {
   startCollapsed:1,
+  showFavicons:0,
+  showFaviconPlaceholder:1,
   displayInlineNotes:0,
   compactMode:0,
   launchWithDoubleClick:0
 }
 var update = async (type = '') => {
   browser.runtime.sendMessage({ type:type }).then((msg) => {
-    console[type](msg.response)
+    console[msg.type](msg.response)
   }, (err) => {
     console.error(err)
   })
@@ -32,17 +34,18 @@ checkDefaults = (opt) => {
     return true
   }
 },
-loadOptions = () => {
-  browser.storage.local.get().then((res) => {
-    if (res.options && !checkDefaults(res.options)) {
-      options.startCollapsed = res.options.startCollapsed
-      options.displayInlineNotes = res.options.displayInlineNotes
-      options.compactMode = res.options.compactMode
-      options.launchWithDoubleClick = res.options.launchWithDoubleClick
-    }
-  })
+loadOptions = (obj) => {
+  if (obj.options && !checkDefaults(obj.options)) {
+    options.startCollapsed = obj.options.startCollapsed
+    options.showFavicons = obj.options.showFavicons
+    options.displayInlineNotes = obj.options.displayInlineNotes
+    options.compactMode = obj.options.compactMode
+    options.launchWithDoubleClick = obj.options.launchWithDoubleClick
+  }
 }
-loadOptions()
+browser.storage.local.get().then((res) => {
+  loadOptions(res)
+})
 
 eventTgts.forEach((tgt, i, arr) => {
   tgt.addListener(() => {
@@ -54,6 +57,6 @@ browser.browserAction.onClicked.addListener((tab) => {
 })
 browser.storage.onChanged.addListener((change, area) => {
   if (area === 'local') {
-    loadOptions()
+    loadOptions(change)
   }
 })
