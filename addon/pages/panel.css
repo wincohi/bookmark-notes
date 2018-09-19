@@ -109,6 +109,9 @@ li.separator{
 li.separator>.title{
   visibility:hidden;
 }
+.title+li{
+  margin-top:.2em;
+}
 .favicon{
   height:1.13em;
   width:1.13em;
