@@ -49,9 +49,7 @@ doImport = async (opts) => {
     importFavicons.forEach((item, i, arr) => {
       currentItems.favicons[item] = importItems.favicons[item]
     })
-    checkLocal.then((res) => {
       browser.storage.local.set({favicons:currentItems.favicons})
-    })
   }
   sendMsg({type:'reload'}).then((msg) => {
     console[msg.type](msg.response)
