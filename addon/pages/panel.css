@@ -51,6 +51,9 @@ ul+li{
 .title{
   display:inline;
   overflow-wrap:break-word;
+  max-width:100%;
+}
+.has-favicon>.title{
   max-width:calc(100% - 1.15em);
 }
 ul>.title{
@@ -86,6 +89,9 @@ ul>ul.collapsed{
 }
 ul>.title:hover{
   opacity:.8;
+}
+ul.collapsed>li{
+  pointer-events:none;
 }
 li:hover{
   border-color:hsla(240,5%,50%,.25);
