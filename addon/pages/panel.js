@@ -321,6 +321,9 @@ browser.storage.onChanged.addListener((change, area) => {
   if (area === 'sync') {
     notes = change.notes.newValue
   }
+  if (area === 'local' && change.favicons) {
+    favicons = change.favicons.newValue
+  }
   if (area === 'local' && change.options) {
     options = change.options.newValue
     panelInit(true)
