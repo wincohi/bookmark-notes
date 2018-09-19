@@ -47,10 +47,7 @@ doImport = async (opts) => {
       currentItems.favicons[item] = importItems.favicons[item]
     })
     checkLocal.then((res) => {
-      let oldStorage = res,
-      newStorage = oldStorage
-      newStorage.favicons = currentItems.favicons
-      browser.storage.local.set(newStorage)
+      browser.storage.local.set({favicons:currentItems.favicons})
     })
   }
   sendMsg({type:'reload'}).then((msg) => {
@@ -60,11 +57,7 @@ doImport = async (opts) => {
 updateOptions = async (ev) => {
   currentOptions[ev.currentTarget.getAttribute('name')] = Number(ev.currentTarget.checked)
   checkLocal.then((res) => {
-    let oldStorage = res,
-    newStorage = oldStorage
-    newStorage.options = currentOptions
-    browser.storage.local.set(newStorage)
-    sendMsg({type:'reload'})
+    browser.storage.local.set({options:currentOptions})
   })
 },
 checkLocal = browser.storage.local.get(),

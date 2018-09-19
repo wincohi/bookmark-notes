@@ -263,7 +263,7 @@ expandCollapse = async (elId, ev) => {
     }
     collapsedFolders = newColl
   }
-  browser.storage.local.set({ collapsed:newColl, opened:newOpen, options:options })
+  browser.storage.local.set({ collapsed:newColl, opened:newOpen })
 },
 panelInit = async (isReload = false) => {
   if (!isReload) {
@@ -306,7 +306,8 @@ browser.storage.onChanged.addListener((change, area) => {
   if (area === 'sync') {
     notes = change.notes.newValue
   }
-  if (area === 'local') {
+  if (area === 'local' && change.options) {
     options = change.options.newValue
+    panelInit(true)
   }
 })
