@@ -34,6 +34,9 @@ li{
   border:1px solid transparent;
   border-block-start:1px solid transparent;
   margin-block-start:-1px;
+  display:flex;
+  align-items:start;
+  overflow-x:hidden;
 }
 li:not(:first-child):not(:nth-child(2)){
   border-block-start-color:hsla(240,5%,50%,.20);
@@ -46,10 +49,9 @@ ul+li{
   border-block-start-color:transparent!important;
 }
 .title{
-  display:flex;
-  align-items:top;
+  display:inline;
   overflow-wrap:break-word;
-  max-width:100%;
+  max-width:calc(100% - 1.15em);
 }
 ul>.title{
   font-weight:bolder;
