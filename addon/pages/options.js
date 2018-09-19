@@ -64,7 +64,19 @@ updateOptions = async (ev) => {
 },
 checkLocal = browser.storage.local.get(),
 checkSync = browser.storage.sync.get(),
-sendMsg = async (msg) => browser.runtime.sendMessage(msg)
+sendMsg = async (msg) => browser.runtime.sendMessage(msg),
+addConditionListener = async (eventEl, tgt) => {
+  let doCheck = async (el) => {
+    if (el.checked && tgt.hasAttribute('disabled')) {
+      tgt.removeAttribute('disabled')
+    } else if (!el.checked && !tgt.hasAttribute('disabled')) {
+      tgt.setAttribute('disabled', 'true')
+    }
+  }
+  eventEl.addEventListener('change', (ev) => {
+    doCheck(this)
+  })
+}
 
 optionsElements.all = [
   optionsElements.startCollapsed,
@@ -96,13 +108,8 @@ checkLocal.then((res) => {
   })
 })
 // note to self: please condense these
-optionsElements.import.options.importNotes.addEventListener('change', (ev) => {
-  if (ev.currentTarget.checked === true && optionsElements.import.options.replaceCurrentNotes.hasAttribute('disabled')) {
-    optionsElements.import.options.replaceCurrentNotes.removeAttribute('disabled')
-  } else if (ev.currentTarget.checked === false && !optionsElements.import.options.replaceCurrentNotes.hasAttribute('disabled')) {
-    optionsElements.import.options.replaceCurrentNotes.setAttribute('disabled', 'true')
-  }
-})
+addConditionListener(optionsElements.showFavicons, optionsElements.showFaviconPlaceholder)
+addConditionListener(optionsElements.import.options.importNotes, optionsElements.import.options.replaceCurrentNotes)
 optionsElements.import.element.addEventListener('change', (ev) => {
   if (ev.currentTarget.files[0]) {
     let importInit = () => {
