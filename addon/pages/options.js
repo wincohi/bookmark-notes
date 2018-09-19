@@ -74,8 +74,9 @@ addConditionListener = async (eventEl, tgt) => {
     }
   }
   eventEl.addEventListener('change', (ev) => {
-    doCheck(this)
+    doCheck(ev.currentTarget)
   })
+  doCheck(eventEl)
 }
 
 optionsElements.all = [
@@ -106,9 +107,9 @@ checkLocal.then((res) => {
       item.checked = false
     }
   })
+  addConditionListener(optionsElements.showFavicons, optionsElements.showFaviconPlaceholder)
 })
 // note to self: please condense these
-addConditionListener(optionsElements.showFavicons, optionsElements.showFaviconPlaceholder)
 addConditionListener(optionsElements.import.options.importNotes, optionsElements.import.options.replaceCurrentNotes)
 optionsElements.import.element.addEventListener('change', (ev) => {
   if (ev.currentTarget.files[0]) {
