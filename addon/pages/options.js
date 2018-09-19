@@ -49,7 +49,7 @@ doImport = async (opts) => {
     importFavicons.forEach((item, i, arr) => {
       currentItems.favicons[item] = importItems.favicons[item]
     })
-      browser.storage.local.set({favicons:currentItems.favicons})
+    browser.storage.local.set({favicons:currentItems.favicons})
   }
   sendMsg({type:'reload'}).then((msg) => {
     console[msg.type](msg.response)
@@ -141,12 +141,12 @@ optionsElements.import.element.addEventListener('change', (ev) => {
         if (invalidSchemes.test(bookmarkElement.getAttribute('href'))) {
           console.log(`caught invalid URL expression: ${bookmarkElement.getAttribute('href')}`)
         } else {
-        if (description && description.nodeName === 'DD') {
-          searchBookmarks({ url:bookmarkElement.getAttribute('href') }, 'notes', description)
-        }
-        if (bookmarkElement.getAttribute('icon')) {
-          searchBookmarks({ url:bookmarkElement.getAttribute('href') }, 'favicons', bookmarkElement)
-        }
+          if (description && description.nodeName === 'DD') {
+            searchBookmarks({ url:bookmarkElement.getAttribute('href') }, 'notes', description)
+          }
+          if (bookmarkElement.getAttribute('icon')) {
+            searchBookmarks({ url:bookmarkElement.getAttribute('href') }, 'favicons', bookmarkElement)
+          }
         }
       })
       optionsElements.import.submit.disabled = false
