@@ -150,14 +150,12 @@ optionsElements.import.element.addEventListener('change', (ev) => {
         }
         }
       })
+      optionsElements.import.submit.disabled = false
     }
     file = optionsElements.import.element.files[0]
     document.querySelector('#import-frame').addEventListener('load', importInit)
     document.querySelector('#import-frame').setAttribute('src', URL.createObjectURL(file))
-    if (optionsElements.import.submit.disabled) {
-      optionsElements.import.submit.disabled = false
-    }
-  } else if (!optionsElements.import.submit.disabled) {
+  } else {
     optionsElements.import.submit.disabled = true
   }
 })
