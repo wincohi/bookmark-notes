@@ -33,6 +33,7 @@ importItems = {
   favicons:{}
 },
 file,
+invalidSchemes = /^(about|data|javascript):/,
 doImport = async (opts) => {
   if (opts.importNotes) {
     let importNotes = Object.getOwnPropertyNames(importItems.notes)
@@ -116,7 +117,7 @@ optionsElements.import.element.addEventListener('change', (ev) => {
     let importInit = () => {
       let frame = window.frames['import-frame'].contentWindow.document,
       items = frame.querySelectorAll('dt'),
-      searchBookmarks = async (searchParams = {}, type = '', element) => {
+      searchBookmarks = (searchParams = {}, type = '', element) => {
         browser.bookmarks.search(searchParams).then((res) => {
           switch (type) {
             case 'notes':
