@@ -119,7 +119,7 @@ makeTemplate = async (i) => {
           return ''
         }
     }
-    }
+  }
   elChild.appendChild(document.createTextNode(`${checkTitle(i)}`))
   switch (i.type) {
     case 'bookmark':
@@ -145,10 +145,10 @@ makeTemplate = async (i) => {
     switch (favicons[i.id]) {
       case undefined:
         if (options.showFaviconPlaceholder && i.type === 'bookmark') {
-    await setAttributes(favicon, {
+          await setAttributes(favicon, {
             'src': '/img/default.svg',
-      'class': 'favicon'
-    })
+            'class': 'favicon'
+          })
           setParams[0].class += ' has-favicon'
           el.appendChild(favicon)
         }
@@ -159,8 +159,8 @@ makeTemplate = async (i) => {
           'class':'favicon'
         })
         setParams[0].class += ' has-favicon'
-    el.appendChild(favicon)
-  }
+        el.appendChild(favicon)
+    }
   }
   el.appendChild(elChild)
   setParams[0].class += ` ${i.type}`

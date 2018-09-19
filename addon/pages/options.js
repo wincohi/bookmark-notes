@@ -67,10 +67,10 @@ checkSync = browser.storage.sync.get(),
 sendMsg = async (msg) => browser.runtime.sendMessage(msg),
 addConditionListener = async (eventEl, tgt) => {
   let doCheck = async (el) => {
-    if (el.checked && tgt.hasAttribute('disabled')) {
-      tgt.removeAttribute('disabled')
-    } else if (!el.checked && !tgt.hasAttribute('disabled')) {
-      tgt.setAttribute('disabled', 'true')
+    if (el.checked && tgt.disabled) {
+      tgt.disabled = false
+    } else if (!el.checked && !tgt.disabled) {
+      tgt.disabled = true
     }
   }
   eventEl.addEventListener('change', (ev) => {
@@ -149,11 +149,11 @@ optionsElements.import.element.addEventListener('change', (ev) => {
     file = optionsElements.import.element.files[0]
     document.querySelector('#import-frame').addEventListener('load', importInit)
     document.querySelector('#import-frame').setAttribute('src', URL.createObjectURL(file))
-    if (optionsElements.import.submit.hasAttribute('disabled')) {
-      optionsElements.import.submit.removeAttribute('disabled')
+    if (optionsElements.import.submit.disabled) {
+      optionsElements.import.submit.disabled = false
     }
-  } else if (!optionsElements.import.submit.hasAttribute('disabled')) {
-    optionsElements.import.submit.setAttribute('disabled', 'true')
+  } else if (!optionsElements.import.submit.disabled) {
+    optionsElements.import.submit.disabled = true
   }
 })
 optionsElements.import.submit.addEventListener('click', (ev) => {

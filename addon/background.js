@@ -43,9 +43,9 @@ loadOptions = (obj) => {
     options.launchWithDoubleClick = obj.options.launchWithDoubleClick
   }
 }
-  browser.storage.local.get().then((res) => {
+browser.storage.local.get().then((res) => {
   loadOptions(res)
-  })
+})
 
 eventTgts.forEach((tgt, i, arr) => {
   tgt.addListener(() => {
