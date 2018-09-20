@@ -73,7 +73,8 @@ ul.collapsed,
   margin-right:-.5em;
   border-color:transparent;
 }
-ul.collapsed>li{
+ul.collapsed>li,
+ul.collapsed>ul{
   display:none;
 }
 ul.collapsed>.title{
@@ -90,9 +91,6 @@ ul>ul.collapsed{
 }
 ul>.title:hover{
   opacity:.8;
-}
-ul.collapsed>li{
-  pointer-events:none;
 }
 li:hover{
   border-color:hsla(240,5%,50%,.25);
