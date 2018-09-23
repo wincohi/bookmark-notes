@@ -33,7 +33,7 @@ importItems = {
   favicons:{}
 },
 file,
-invalidSchemes = /^(about|data|javascript):/,
+invalidSchemes = /^(about|data|javascript|chrome|(jar:)?file):/i,
 doImport = async (opts) => {
   if (opts.importNotes) {
     let importNotes = Object.getOwnPropertyNames(importItems.notes)
