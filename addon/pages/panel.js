@@ -327,14 +327,19 @@ browser.runtime.onMessage.addListener((msg, sender, respond) => {
   }
 })
 browser.storage.onChanged.addListener((change, area) => {
-  if (area === 'sync') {
+  switch (area) {
+    case 'sync':
     notes = change.notes.newValue
-  }
-  if (area === 'local' && change.favicons) {
+    break
+    case 'local':
+      if (change.favicons) {
     favicons = change.favicons.newValue
   }
-  if (area === 'local' && change.options) {
+      if (change.options) {
     options = change.options.newValue
     panelInit(true)
+  }
+    break
+    default:
   }
 })
