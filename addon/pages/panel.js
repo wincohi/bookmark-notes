@@ -309,7 +309,6 @@ panelInit = async (isReload = false) => {
   tree.children.forEach((b, i, arr) => makeTree(b))
 }
 
-
 panelInit()
 
 browser.runtime.onMessage.addListener((msg, sender, respond) => {
