@@ -170,10 +170,19 @@ makeTemplate = async (i) => {
   }
   return el
 },
-addListeners = async (event = '', element, func, params) => {
-  element.addEventListener(event, (ev) => {
-    func(params, ev)
+addListeners = async (event, element, func, params) => {
+  if (element.length) {
+    element.forEach((el, i, arr) => {
+      let thisEvent = event,
+      thisFunc = func[i] || func,
+      thisParams = params
+      if (typeof(event) === 'object') thisEvent = event[i]
+      if (typeof(params) === 'object' && params.length) thisParams = params[i]
+      el.addEventListener(thisEvent, (ev) => thisFunc(thisParams, ev))
   })
+  } else {
+    element.addEventListener(event, (ev) => func(params, ev))
+  }
 },
 makeTree = async (item, parent = tree) => {
   let parentEl = document.querySelector(`[data-id="${parent.id}"]`)
