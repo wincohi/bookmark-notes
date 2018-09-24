@@ -6,12 +6,16 @@ const defaultOptions = {
   compactMode:0,
   launchWithDoubleClick:0
 }
-var update = async (type = '') => {
-  browser.runtime.sendMessage({ type:type }).then((msg) => {
+var update = async (id, info) => {
+  let type
+  { if (info.type) type = 'created'
+    else if (info.oldParentId) type = 'moved'
+    else if (info.parentId) type = 'removed'
+    else if (info.title) type = 'changed' }
+  browser.runtime.sendMessage({ type:type, id:id, info:info }).then((msg) => {
     console[msg.type](msg.response)
-  }, (err) => {
-    console.error(err)
-  })
+  }, (err) => console.error(err))
+  console.log(info, `type: '${type}'`)
 },
 eventTgts = [
   browser.bookmarks.onChanged,
@@ -48,8 +52,8 @@ browser.storage.local.get().then((res) => {
 })
 
 eventTgts.forEach((tgt, i, arr) => {
-  tgt.addListener(() => {
-    update('reload')
+  tgt.addListener((id, info) => {
+    update(id, info)
   })
 })
 browser.browserAction.onClicked.addListener((tab) => {
