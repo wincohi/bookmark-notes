@@ -179,7 +179,7 @@ addListeners = async (event, element, func, params) => {
       if (typeof(event) === 'object') thisEvent = event[i]
       if (typeof(params) === 'object' && params.length) thisParams = params[i]
       el.addEventListener(thisEvent, (ev) => thisFunc(thisParams, ev))
-  })
+    })
   } else {
     element.addEventListener(event, (ev) => func(params, ev))
   }
@@ -251,7 +251,7 @@ expandCollapse = async (elId, ev) => {
         if (openedFolders !== []) {
           newOpen = []
         }
-        break
+      break
       default:
         // add new items to storage, and remove old ones
         openEl.forEach((item, index, arr) => {
@@ -272,7 +272,7 @@ expandCollapse = async (elId, ev) => {
         if (collapsedFolders !== []) {
           newColl = []
         }
-        break
+      break
       default:
         collEl.forEach((item, index, arr) => {
           if (!collapsedFolders.includes(item)) {
@@ -292,12 +292,11 @@ expandCollapse = async (elId, ev) => {
 panelInit = async (isReload = false) => {
   if (!isReload) {
     // we don't need to add listeners to Save & Cancel buttons if we already have, so don't
-    document.querySelector('#popup-buttons>.button.cancel').addEventListener('click', (ev) => {
-      closePopup('cancel', ev)
-    })
-    document.querySelector('#popup-buttons>.button.save').addEventListener('click', (ev) => {
-      closePopup('save', ev)
-    })
+    let elements = [
+      document.querySelector('#popup-buttons>.button.cancel'),
+      document.querySelector('#popup-buttons>.button.save')
+    ]
+    addListeners('click', elements, closePopup, ['cancel', 'save'])
   } else {
     // clear the tree if we're reloading the bookmarks from scratch
     document.querySelector('#tree').innerHTML = ''
@@ -307,12 +306,9 @@ panelInit = async (isReload = false) => {
   }, (err) => {
     console.error(`error getting bookmarks: '${err}'`)
   })
-  tree.children.forEach((b, i, arr) => {
-    makeTree(b)
-  })
+  tree.children.forEach((b, i, arr) => makeTree(b))
 }
 
-// - - - end function defs - - -
 
 panelInit()
 
@@ -321,7 +317,7 @@ browser.runtime.onMessage.addListener((msg, sender, respond) => {
     case 'reload':
       respond({ type:'log', response:'*thumbs up emoji*' })
       panelInit(true)
-      break
+    break
     default:
       respond({ type:'error', response:`unknown or missing message type: '${msg.type}'` })
   }
@@ -329,16 +325,16 @@ browser.runtime.onMessage.addListener((msg, sender, respond) => {
 browser.storage.onChanged.addListener((change, area) => {
   switch (area) {
     case 'sync':
-    notes = change.notes.newValue
+      notes = change.notes.newValue
     break
     case 'local':
       if (change.favicons) {
-    favicons = change.favicons.newValue
-  }
+        favicons = change.favicons.newValue
+      }
       if (change.options) {
-    options = change.options.newValue
-    panelInit(true)
-  }
+        options = change.options.newValue
+        panelInit(true)
+      }
     break
     default:
   }
