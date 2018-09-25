@@ -39,7 +39,7 @@ li{
   overflow-x:hidden;
 }
 li:not(:first-child):not(:nth-child(2)){
-  border-block-start-color:hsla(240,5%,50%,.20);
+  border-block-start-color:hsla(240,5%,50%,.25);
 }
 .title+li,
 .separator+li,
