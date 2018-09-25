@@ -32,14 +32,12 @@ browser.storage.local.get().then((res) => {
   if (res.favicons) {
     favicons = res.favicons
   }
-}, (err) => {
-  console.error(`error getting local storage: '${err}'`)
-})
-browser.storage.sync.get('notes').then((res) => {
-  notes = res.notes || {}
-}, (err) => {
-  console.error(`error getting synced notes: '${err}`)
-})
+}, (err) => console.error(`error getting local storage: '${err}'`))
+
+browser.storage.sync.get('notes').then((res) =>
+  notes = res.notes || {},
+(err) =>
+  console.error(`error getting synced notes: '${err}`))
 
 var checkTitle = (input = { title:'', url:'' }) => {
   switch (input.title) {
@@ -137,7 +135,6 @@ makeTemplate = async (i) => {
     break
     default:
       // nothing to see here, go home
-    break
   }
   el = document.createElement(elType)
   elTarget.arr = [el, elChild]
@@ -247,7 +244,7 @@ expandCollapse = async (elId, ev) => {
     switch (collEl.length) {
       case 0:
         /* if there are no open elements, but there are
-        * still folder IDs in openedFolders, remove them all */
+         * still folder IDs in openedFolders, remove them all */
         if (openedFolders !== []) {
           newOpen = []
         }
@@ -301,25 +298,84 @@ panelInit = async (isReload = false) => {
     // clear the tree if we're reloading the bookmarks from scratch
     document.querySelector('#tree').innerHTML = ''
   }
-  await browser.bookmarks.getTree().then((res) => {
-    tree = res[0]
-  }, (err) => {
-    console.error(`error getting bookmarks: '${err}'`)
-  })
+  await browser.bookmarks.getTree().then((t) => tree = t[0],
+    (err) => console.error(`error getting bookmarks: '${err}'`))
   tree.children.forEach((b, i, arr) => makeTree(b))
+},
+newBookmark = async (item) => {
+  let newItem,
+  parent
+  if (item) {
+    newItem = await makeTemplate(item)
+    parent = document.querySelector(`[data-id="${item.parentId}"]`)
+    parent.insertBefore(newItem, parent.children[item.index])
+  }
+},
+moveBookmark = async (id, oldInfo, newInfo) => {
+  let newParent = document.querySelector(`[data-id=${newInfo.parent}]`),
+  el = document.querySelector(`[data-id="${id}"]`),
+  newIndex = () => {
+    // if the entry is being moved within the same folder, we need to correct for that
+    if (oldInfo.parent === newInfo.parent && oldInfo.index < newInfo.index)
+      return 2
+    else
+      return 1
+  }
+  if (el)
+    newParent.insertBefore(el, newParent.children[newInfo.index + newIndex()])
+  else
+    browser.bookmarks.get(id).then((res) => newBookmark(res[0]))
+},
+deleteBookmark = async (id) => {
+  let b = document.querySelector(`[data-id="${id}"]`)
+  if (b)
+    b.remove()
+  else
+    console.log(`bookmarks.onRemoved fired, but no element exists with id '${id}'`)
+},
+updateBookmark = async (id, info) => {
+  let b = document.querySelector(`[data-id="${id}"]>.title`)
+  if (b) {
+    if (info.title) {
+      b.innerText = info.title
+      b.setAttribute('data-title', info.title)
+    }
+    if (info.url)
+      b.setAttribute('title', info.url)
+  } else {
+    browser.bookmarks.get(id).then((res) => newBookmark(res[0]))
+  }
 }
 
 panelInit()
 
 browser.runtime.onMessage.addListener((msg, sender, respond) => {
   switch (msg.type) {
-    case 'reload':
-      respond({ type:'log', response:'*thumbs up emoji*' })
-      panelInit(true)
+    case 'created':
+      newBookmark(msg.info.bookmark)
+    break
+    case 'moved':
+      let oldInfo = {
+        parent:msg.info.oldParentId,
+        index:msg.info.oldIndex
+      },
+      newInfo = {
+        parent:msg.info.parentId,
+        index:msg.info.index
+      }
+      moveBookmark(msg.id, oldInfo, newInfo)
+    break
+    case 'removed':
+      deleteBookmark(msg.id)
+    break
+    case 'changed':
+      updateBookmark(msg.id, { title:msg.info.title, url:msg.info.url })
     break
     default:
-      respond({ type:'error', response:`unknown or missing message type: '${msg.type}'` })
+      // there's literally nothing here
   }
+  browser.bookmarks.getTree().then((t) => tree = t[0])
+  respond({ type: 'log', response: `processed message type: '${msg.type}'` })
 })
 browser.storage.onChanged.addListener((change, area) => {
   switch (area) {
@@ -336,5 +392,6 @@ browser.storage.onChanged.addListener((change, area) => {
       }
     break
     default:
+      // nope.
   }
 })

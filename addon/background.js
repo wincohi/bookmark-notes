@@ -11,11 +11,10 @@ var update = async (id, info) => {
   { if (info.type) type = 'created'
     else if (info.oldParentId) type = 'moved'
     else if (info.parentId) type = 'removed'
-    else if (info.title) type = 'changed' }
+    else if (info.title || info.url) type = 'changed' }
   browser.runtime.sendMessage({ type:type, id:id, info:info }).then((msg) => {
     console[msg.type](msg.response)
   }, (err) => console.error(err))
-  console.log(info, `type: '${type}'`)
 },
 eventTgts = [
   browser.bookmarks.onChanged,
