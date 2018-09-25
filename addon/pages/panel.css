@@ -214,3 +214,12 @@ body:not([popup-opened]) #popup{
 #popup-buttons>.button:hover{
   text-decoration:underline;
 }
+
+/* options */
+
+body.compact-mode li>.title{
+  text-overflow:clip;
+  white-space:nowrap;
+  mask-image:linear-gradient(to right, black, black calc(100% - 1em), transparent 100%);
+  width:100%;
+}

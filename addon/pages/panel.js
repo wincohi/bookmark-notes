@@ -27,6 +27,11 @@ browser.storage.local.get().then((res) => {
     openedFolders = res.opened
   if (res.options) {
     options = res.options
+    let classes = []
+    if (options.compactMode)
+      classes.push('compact-mode')
+    let classString = classes.toString().replace(',', ' ')
+    document.body.setAttribute('class', classString)
   }
   if (res.favicons)
     favicons = res.favicons
