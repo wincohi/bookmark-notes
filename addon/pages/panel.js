@@ -21,18 +21,15 @@ var tree = { id:'root________', children:[] },
 
 // initial storage gets
 browser.storage.local.get().then((res) => {
-  if (res.collapsed) {
+  if (res.collapsed)
     collapsedFolders = res.collapsed
-  }
-  if (res.opened) {
+  if (res.opened)
     openedFolders = res.opened
-  }
   if (res.options) {
     options = res.options
   }
-  if (res.favicons) {
+  if (res.favicons)
     favicons = res.favicons
-  }
 }, (err) => console.error(`error getting local storage: '${err}'`))
 
 browser.storage.sync.get('notes').then((res) =>
@@ -299,8 +296,7 @@ panelInit = async (isReload = false) => {
     // clear the tree if we're reloading the bookmarks from scratch
     document.querySelector('#tree').innerHTML = ''
   }
-  await browser.bookmarks.getTree().then((t) => tree = t[0],
-    (err) => console.error(`error getting bookmarks: '${err}'`))
+  await browser.bookmarks.getTree().then((t) => tree = t[0])
   tree.children.forEach((b, i, arr) => makeTree(b))
 },
 newBookmark = async (item) => {
@@ -376,7 +372,7 @@ browser.runtime.onMessage.addListener((msg, sender, respond) => {
       // there's literally nothing here
   }
   browser.bookmarks.getTree().then((t) => tree = t[0])
-  respond({ type: 'log', response: `processed message type: '${msg.type}'` })
+  respond({ type:'log', response:`processed message type: '${msg.type}'` })
 })
 browser.storage.onChanged.addListener((change, area) => {
   switch (area) {
@@ -384,9 +380,8 @@ browser.storage.onChanged.addListener((change, area) => {
       notes = change.notes.newValue
     break
     case 'local':
-      if (change.favicons) {
+      if (change.favicons)
         favicons = change.favicons.newValue
-      }
       if (change.options) {
         options = change.options.newValue
         panelInit(true)
