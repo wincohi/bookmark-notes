@@ -43,6 +43,7 @@ loadOptions = (obj) => {
     options.startCollapsed = obj.options.startCollapsed
     options.showFavicons = obj.options.showFavicons
     options.displayInlineNotes = obj.options.displayInlineNotes
+    options.highlightCurrentPage = obj.options.highlightCurrentPage
     options.compactMode = obj.options.compactMode
     options.launchWithDoubleClick = obj.options.launchWithDoubleClick
   }

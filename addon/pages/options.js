@@ -59,6 +59,8 @@ doImport = async (opts) => {
 },
 updateOptions = async (ev) => {
   currentOptions[ev.currentTarget.getAttribute('name')] = Number(ev.currentTarget.checked)
+  if (event.currentTarget.id === 'highlight-current-page')
+    await browser.permissions.request({ permissions:['tabs'] })
   checkLocal.then((res) => {
     browser.storage.local.set({options:currentOptions})
   })
