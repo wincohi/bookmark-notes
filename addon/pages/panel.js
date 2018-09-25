@@ -4,6 +4,7 @@ const defaultOptions = {
   showFaviconPlaceholder:1,
   displayInlineNotes:0,
   highlightCurrentPage:0,
+  displayNoteIndicator:1,
   compactMode:0,
   launchWithDoubleClick:0
 }
@@ -27,20 +28,16 @@ browser.storage.local.get().then((res) => {
     openedFolders = res.opened
   if (res.options) {
     options = res.options
-    let classes = []
-    if (options.compactMode)
-      classes.push('compact-mode')
-    let classString = classes.toString().replace(',', ' ')
-    document.body.setAttribute('class', classString)
+    updateClasses()
   }
   if (res.favicons)
     favicons = res.favicons
-}, (err) => console.error(`error getting local storage: '${err}'`))
+})
 
-browser.storage.sync.get('notes').then((res) =>
-  notes = res.notes || {},
-(err) =>
-  console.error(`error getting synced notes: '${err}`))
+browser.storage.sync.get('notes').then((res) => {
+  notes = res.notes || {}
+  markNotes()
+})
 
 var checkTitle = (input = { title:'', url:'' }) => {
   switch (input.title) {
@@ -54,6 +51,26 @@ var checkTitle = (input = { title:'', url:'' }) => {
     default:
       return input.title
   }
+},
+updateClasses = async () => {
+  let classes = []
+  if (options.compactMode)
+    classes.push('compact-mode')
+  if (options.displayNoteIndicator)
+    classes.push('note-highlight')
+  let classString = classes.toString().replace(',', ' ')
+  document.body.setAttribute('class', classString)
+},
+markNotes = async () => {
+  let noteIds = Object.getOwnPropertyNames(notes)
+  if (document.querySelector('[data-has-note]')) {
+    document.querySelectorAll('[data-has-note]').forEach((el) => el.removeAttribute('data-has-note'))
+  }
+  noteIds.forEach((id, i, arr) => {
+    let el = document.querySelector(`[data-id="${id}"]`)
+    if (el)
+      el.setAttribute('data-has-note', 'true')
+  })
 },
 setAttributes = async (el, atts, method = 'set') => {
   let doAttr = (e, a = atts) => {
@@ -73,15 +90,10 @@ setAttributes = async (el, atts, method = 'set') => {
   }
   if (el.length) {
     // if el is an array instead of a single NodeObject, handle it appropriately
-    if (atts.length) {
-      el.forEach((item, index) => {
-        doAttr(item, atts[index])
-      })
-    } else {
-      el.forEach((item, index) => {
-        doAttr(item)
-  })
-    }
+    if (atts.length)
+      el.forEach((item, index) => doAttr(item, atts[index]))
+    else
+      el.forEach((item, index) => doAttr(item))
   } else {
     doAttr(el)
   }
@@ -162,6 +174,8 @@ makeTemplate = async (i) => {
         el.appendChild(favicon)
     }
   }
+  if (notes[i.id])
+    setParams[0]['data-has-note'] = 'true'
   el.appendChild(elChild)
   setParams[0].class += ` ${i.type}`
   setAttributes([el, elChild], setParams)
@@ -227,7 +241,12 @@ closePopup = async (method) => {
   popup.id = popup.element.getAttribute('data-open-id')
   switch (method) {
     case 'save':
-      notes[popup.id] = document.querySelector('#note-input').value
+      let note = document.querySelector('#note-input').value
+      if (note !== '')
+        notes[popup.id] = note
+      else if (notes[popup.id]) {
+        delete notes[popup.id]
+      }
       browser.storage.sync.set({ notes:notes })
     case 'cancel':
       setAttributes([document.body, popup.element], ['popup-opened', 'data-open-id'], 'remove')
@@ -301,6 +320,8 @@ panelInit = async (isReload = false) => {
     // clear the tree if we're reloading the bookmarks from scratch
     document.querySelector('#tree').innerHTML = ''
   }
+  if (isReload)
+    updateClasses()
   await browser.bookmarks.getTree().then((t) => tree = t[0])
   tree.children.forEach((b, i, arr) => makeTree(b))
 },
@@ -383,6 +404,7 @@ browser.storage.onChanged.addListener((change, area) => {
   switch (area) {
     case 'sync':
       notes = change.notes.newValue
+      markNotes()
     break
     case 'local':
       if (change.favicons)

@@ -4,6 +4,7 @@ const defaultOptions = {
   showFaviconPlaceholder:1,
   displayInlineNotes:0,
   highlightCurrentPage:0,
+  displayNoteIndicator:1,
   compactMode:0,
   launchWithDoubleClick:0
 }
@@ -44,6 +45,7 @@ loadOptions = (obj) => {
     options.showFavicons = obj.options.showFavicons
     options.displayInlineNotes = obj.options.displayInlineNotes
     options.highlightCurrentPage = obj.options.highlightCurrentPage
+    options.displayNoteIndicator = obj.options.displayNoteIndicator
     options.compactMode = obj.options.compactMode
     options.launchWithDoubleClick = obj.options.launchWithDoubleClick
   }

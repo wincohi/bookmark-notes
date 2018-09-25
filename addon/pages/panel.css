@@ -223,3 +223,13 @@ body.compact-mode li>.title{
   mask-image:linear-gradient(to right, black, black calc(100% - 1em), transparent 100%);
   width:100%;
 }
+body.note-highlight li[data-has-note]::before{
+  content:'\00a0';
+  width:3px;
+  height:100%;
+  display:block;
+  background-color:Highlight;
+  border-radius:2px;
+  margin-left:-4px;
+  margin-right:1px;
+}

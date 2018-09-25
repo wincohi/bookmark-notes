@@ -4,6 +4,7 @@ const defaultOptions = {
   showFaviconPlaceholder:1,
   displayInlineNotes:0,
   highlightCurrentPage:0,
+  displayNoteIndicator:1,
   compactMode:0,
   launchWithDoubleClick:0
 }
@@ -14,6 +15,7 @@ optionsElements = {
   showFaviconPlaceholder:document.querySelector('#show-favicon-placeholder'),
   displayInlineNotes:document.querySelector('#inline-notes'),
   highlightCurrentPage:document.querySelector('#highlight-current-page'),
+  displayNoteIndicator:document.querySelector('#display-note-indicator'),
   compactMode:document.querySelector('#compact-mode'),
   launchWithDoubleClick:document.querySelector('#double-click-open'),
   import:{
@@ -88,6 +90,7 @@ optionsElements.all = [
   optionsElements.showFaviconPlaceholder,
   optionsElements.displayInlineNotes,
   optionsElements.highlightCurrentPage,
+  optionsElements.displayNoteIndicator,
   optionsElements.compactMode,
   optionsElements.launchWithDoubleClick
 ]
