@@ -3,6 +3,7 @@ const defaultOptions = {
   showFavicons:0,
   showFaviconPlaceholder:1,
   displayInlineNotes:0,
+  highlightCurrentPage:0,
   compactMode:0,
   launchWithDoubleClick:0
 }
