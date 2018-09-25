@@ -20,6 +20,10 @@
     "storage"
   ],
 
+  "optional_permissions":[
+    "tabs"
+  ],
+
   "background":{
     "scripts":["background.js"]
   },
