@@ -36,7 +36,7 @@ form{
   margin-top:.5em;
 }
 a{
-  color:-moz-hyperlinktext;
+  color:Highlight;
   text-decoration:none;
 }
 a:hover{

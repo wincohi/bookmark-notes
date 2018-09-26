@@ -49,9 +49,9 @@ ul+li{
   border-block-start-color:transparent!important;
 }
 .title{
-  display:inline;
+  display:inline-block;
   overflow-wrap:break-word;
-  max-width:100%;
+  width:100%;
 }
 .has-favicon>.title{
   max-width:calc(100% - 1.15em);
@@ -106,9 +106,6 @@ li.separator{
 }
 li.separator>.title{
   visibility:hidden;
-}
-.title+li{
-  margin-top:.2em;
 }
 .favicon{
   height:1.13em;
@@ -207,8 +204,8 @@ body:not([popup-opened]) #popup{
   cursor:pointer;
 }
 #popup-buttons>.button.save{
-  background-color:-moz-menuhover;
-  color:-moz-default-background-color;
+  background-color:Highlight;
+  color:#fff;
   border-left:1px solid -moz-cellhighlight;
 }
 #popup-buttons>.button:hover{
@@ -221,7 +218,6 @@ body.compact-mode li>.title{
   text-overflow:clip;
   white-space:nowrap;
   mask-image:linear-gradient(to right, black, black calc(100% - 1em), transparent 100%);
-  width:100%;
 }
 body.note-highlight li[data-has-note]::before{
   content:'\00a0';
