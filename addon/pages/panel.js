@@ -105,6 +105,50 @@ getAttributes = (input, attr) => {
   })
   return output
 },
+toggleSearchFocused = async (c = '', s = document.querySelector('#search-bar-outer')) => {
+  switch (c) {
+    case 'focus':
+      s.setAttribute('focused', 'true')
+    break
+    case 'blur':
+      s.removeAttribute('focused')
+    break
+    default:
+      // nothing here
+  }
+},
+filter = async (query = '') => {
+  document.querySelectorAll('[filter-match]').forEach((el, i, arr) => el.removeAttribute('filter-match'))
+  if (query === '' && document.body.hasAttribute('filtering')) {
+    document.body.removeAttribute('filtering')
+  } else {
+    let queryR = new RegExp(query, 'i')
+    if (!document.body.hasAttribute('filtering'))
+      document.body.setAttribute('filtering', 'true')
+    let allElements = document.querySelectorAll('li>.title')
+    matches = {
+      liArray:[],
+      ulArray:[]
+    },
+    markParents = async (el) => {
+      if (el.parentElement && el.parentElement.nodeName === 'UL') {
+        matches.ulArray.push(el.parentElement)
+        markParents(el.parentElement)
+      }
+    }
+    allElements.forEach((el, i, arr) => {
+      let title = el.getAttribute('data-title'),
+      url = el.getAttribute('title')
+      if (queryR.test(title) || queryR.test(url))
+        matches.liArray.push(el.parentElement)
+    })
+    matches.liArray.forEach((el, i, arr) => {
+      el.setAttribute('filter-match', 'true')
+      markParents(el)
+    })
+    matches.ulArray.forEach((el, i, arr) => el.setAttribute('filter-match', 'true'))
+  }
+},
 makeTemplate = async (i) => {
   let elType = 'li',
   handleFunc,
@@ -418,3 +462,8 @@ browser.storage.onChanged.addListener((change, area) => {
       // nope.
   }
 })
+document.querySelector('#search').addEventListener('click', (ev) => document.querySelector('#search-bar-inner').focus())
+;['blur', 'focus'].forEach((ev, i, arr) =>
+  document.querySelector('#search-bar-inner').addEventListener(ev, () =>
+    toggleSearchFocused(ev)))
+document.querySelector('#search-bar-inner').addEventListener('input', (ev) => filter(document.querySelector('#search-bar-inner').value))
