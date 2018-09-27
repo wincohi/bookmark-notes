@@ -413,13 +413,15 @@ updateBookmark = async (id, info) => {
   }
 },
 checkActive = async (url) => {
-  let matchingBookmark = document.querySelector(`[title="${url}"]`),
-  prev = document.querySelector('[current-tab]')
-  console.log(`searching for bookmark to match '${url}'`)
-  if (prev)
-    prev.removeAttribute('current-tab')
-  if (matchingBookmark)
-    matchingBookmark.parentElement.setAttribute('current-tab', 'true')
+  if (options.highlightCurrentPage) {
+    let matchingBookmark = document.querySelector(`[title="${url}"]`),
+      prev = document.querySelector('[current-tab]')
+    console.log(`searching for bookmark to match '${url}'`)
+    if (prev)
+      prev.removeAttribute('current-tab')
+    if (matchingBookmark)
+      matchingBookmark.parentElement.setAttribute('current-tab', 'true')
+  }
 }
 
 // - - - end function defs - - -
