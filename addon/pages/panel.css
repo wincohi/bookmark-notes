@@ -86,7 +86,7 @@ li{
   border-block-start:1px solid transparent;
   margin-block-start:-1px;
   display:flex;
-  align-items:start;
+  align-items:center;
   overflow-x:hidden;
 }
 li:not(:first-child):not(:nth-child(2)){
@@ -114,9 +114,16 @@ ul>.title{
   cursor:pointer;
   transition:opacity .15s var(--quantum-timing-func)
 }
+ul.collapsed>.title::before{
+  transform:none;
+}
 ul>.title::before{
-  content:'\2013';
-  padding-right:.2em;
+  content:'\203a';
+  transform:rotate(90deg);
+  display:inline-block;
+  width:8px;
+  line-height:8px;
+  text-align:center;
 }
 ul.collapsed,
 #tree>ul.collapsed{
@@ -131,10 +138,6 @@ ul.collapsed>ul{
 ul.collapsed>.title{
   opacity:.7;
   margin-left:-.1em;
-}
-ul.collapsed>.title::before{
-  content:'+';
-  padding-right:.2em;
 }
 ul>ul.collapsed{
   margin-left:0;
@@ -159,6 +162,7 @@ li.separator>.title{
   visibility:hidden;
 }
 .favicon{
+  align-self:start;
   height:1.13em;
   width:1.13em;
   margin:.15em .25em 0 0;
@@ -268,15 +272,28 @@ body:not([popup-opened]) #popup{
 body.compact-mode li>.title{
   text-overflow:clip;
   white-space:nowrap;
+  overflow:hidden;
   mask-image:linear-gradient(to right, black, black calc(100% - 1em), transparent 100%);
 }
-body.note-highlight li[data-has-note]::before{
+body.note-highlight li[data-has-note]::after{
+  content:'\00a0';
+  width:20px;
+  background-image:url('/img/note.svg');
+  background-size:16px;
+  background-repeat:no-repeat;
+  background-position:center;
+  height:18px;
+  display:inline-table;
+  background-color:#45a1ff;
+  border-radius:2px;
+  opacity:.9;
+}
+li[current-tab]::before{
   content:'\00a0';
   width:3px;
   height:100%;
-  display:block;
+  display:inline-table;
   background-color:Highlight;
   border-radius:2px;
-  margin-left:-4px;
-  margin-right:1px;
+  margin-left:-3px;
 }
