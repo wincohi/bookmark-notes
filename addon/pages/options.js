@@ -5,7 +5,7 @@ const defaultOptions = {
   displayInlineNotes:0,
   highlightCurrentPage:0,
   displayNoteIndicator:1,
-  compactMode:0,
+  compactMode:1,
   launchWithDoubleClick:0
 }
 var currentOptions = defaultOptions,
