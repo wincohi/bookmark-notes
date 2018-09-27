@@ -33,7 +33,6 @@ browser.storage.local.get().then((res) => {
   if (res.favicons)
     favicons = res.favicons
 })
-
 browser.storage.sync.get('notes').then((res) => {
   notes = res.notes || {}
   markNotes()
@@ -412,10 +411,30 @@ updateBookmark = async (id, info) => {
   } else {
     browser.bookmarks.get(id).then((res) => newBookmark(res[0]))
   }
+},
+checkActive = async (url) => {
+  let matchingBookmark = document.querySelector(`[title="${url}"]`),
+  prev = document.querySelector('[current-tab]')
+  console.log(`searching for bookmark to match '${url}'`)
+  if (prev)
+    prev.removeAttribute('current-tab')
+  if (matchingBookmark)
+    matchingBookmark.parentElement.setAttribute('current-tab', 'true')
 }
+
+// - - - end function defs - - -
 
 panelInit()
 
+browser.permissions.contains({ permissions:['tabs'] }).then((res) => {
+  if (res) {
+    [browser.tabs.onUpdated, browser.tabs.onActivated].forEach((ev, i, arr) => {
+      ev.addListener((tId) => browser.tabs.query({ active: true, currentWindow: true }).then((tabs) =>
+        tabs.forEach((t) => checkActive(t.url))
+      ))
+    })
+  }
+})
 browser.runtime.onMessage.addListener((msg, sender, respond) => {
   switch (msg.type) {
     case 'created':
@@ -437,6 +456,13 @@ browser.runtime.onMessage.addListener((msg, sender, respond) => {
     break
     case 'changed':
       updateBookmark(msg.id, { title:msg.info.title, url:msg.info.url })
+    break
+    case 'permissionsAdded':
+      [browser.tabs.onUpdated, browser.tabs.onActivated].forEach((ev, i, arr) => {
+        ev.addListener((tId) => browser.tabs.query({ active: true, currentWindow: true }).then((tab) =>
+          checkActive(tab.url)
+        ))
+      })
     break
     default:
       // there's literally nothing here

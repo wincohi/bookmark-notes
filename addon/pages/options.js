@@ -60,9 +60,24 @@ doImport = async (opts) => {
   })
 },
 updateOptions = async (ev) => {
-  currentOptions[ev.currentTarget.getAttribute('name')] = Number(ev.currentTarget.checked)
-  if (event.currentTarget.id === 'highlight-current-page')
-    await browser.permissions.request({ permissions:['tabs'] })
+  let thisOption = ev.currentTarget,
+  hasTabsPermission = false
+  browser.permissions.contains({ permissions:['tabs'] }).then((r) => hasTabsPermission = r)
+  if (thisOption.id === 'highlight-current-page' && thisOption.checked) {
+    await browser.permissions.request({ permissions:['tabs'] }).then((res) => {
+      switch (res) {
+        case true:
+          if (!hasTabsPermission) {
+            console.log('tabs permission granted')
+            sendMsg({ type:'permissionsAdded' }).then((msg) => console[msg.type](msg.response))
+          }
+        break
+        default:
+          thisOption.checked = false
+      }
+    })
+  }
+  currentOptions[thisOption.getAttribute('name')] = Number(thisOption.checked)
   checkLocal.then((res) => {
     browser.storage.local.set({options:currentOptions})
   })
