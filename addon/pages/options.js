@@ -3,7 +3,9 @@ const defaultOptions = {
   showFavicons:0,
   showFaviconPlaceholder:1,
   displayInlineNotes:0,
-  compactMode:0,
+  highlightCurrentPage:0,
+  displayNoteIndicator:1,
+  compactMode:1,
   launchWithDoubleClick:0
 }
 var currentOptions = defaultOptions,
@@ -12,6 +14,8 @@ optionsElements = {
   showFavicons:document.querySelector('#show-favicons'),
   showFaviconPlaceholder:document.querySelector('#show-favicon-placeholder'),
   displayInlineNotes:document.querySelector('#inline-notes'),
+  highlightCurrentPage:document.querySelector('#highlight-current-page'),
+  displayNoteIndicator:document.querySelector('#display-note-indicator'),
   compactMode:document.querySelector('#compact-mode'),
   launchWithDoubleClick:document.querySelector('#double-click-open'),
   import:{
@@ -56,7 +60,24 @@ doImport = async (opts) => {
   })
 },
 updateOptions = async (ev) => {
-  currentOptions[ev.currentTarget.getAttribute('name')] = Number(ev.currentTarget.checked)
+  let thisOption = ev.currentTarget,
+  hasTabsPermission = false
+  browser.permissions.contains({ permissions:['tabs'] }).then((r) => hasTabsPermission = r)
+  if (thisOption.id === 'highlight-current-page' && thisOption.checked) {
+    await browser.permissions.request({ permissions:['tabs'] }).then((res) => {
+      switch (res) {
+        case true:
+          if (!hasTabsPermission) {
+            console.log('tabs permission granted')
+            sendMsg({ type:'permissionsAdded' }).then((msg) => console[msg.type](msg.response))
+          }
+        break
+        default:
+          thisOption.checked = false
+      }
+    })
+  }
+  currentOptions[thisOption.getAttribute('name')] = Number(thisOption.checked)
   checkLocal.then((res) => {
     browser.storage.local.set({options:currentOptions})
   })
@@ -83,6 +104,8 @@ optionsElements.all = [
   optionsElements.showFavicons,
   optionsElements.showFaviconPlaceholder,
   optionsElements.displayInlineNotes,
+  optionsElements.highlightCurrentPage,
+  optionsElements.displayNoteIndicator,
   optionsElements.compactMode,
   optionsElements.launchWithDoubleClick
 ]

@@ -3,15 +3,20 @@ const defaultOptions = {
   showFavicons:0,
   showFaviconPlaceholder:1,
   displayInlineNotes:0,
-  compactMode:0,
+  highlightCurrentPage:0,
+  displayNoteIndicator:1,
+  compactMode:1,
   launchWithDoubleClick:0
 }
-var update = async (type = '') => {
-  browser.runtime.sendMessage({ type:type }).then((msg) => {
+var update = async (id, info) => {
+  let type
+  { if (info.type) type = 'created'
+    else if (info.oldParentId) type = 'moved'
+    else if (info.parentId) type = 'removed'
+    else if (info.title || info.url) type = 'changed' }
+  browser.runtime.sendMessage({ type:type, id:id, info:info }).then((msg) => {
     console[msg.type](msg.response)
-  }, (err) => {
-    console.error(err)
-  })
+  }, (err) => console.error(err))
 },
 eventTgts = [
   browser.bookmarks.onChanged,
@@ -39,6 +44,8 @@ loadOptions = (obj) => {
     options.startCollapsed = obj.options.startCollapsed
     options.showFavicons = obj.options.showFavicons
     options.displayInlineNotes = obj.options.displayInlineNotes
+    options.highlightCurrentPage = obj.options.highlightCurrentPage
+    options.displayNoteIndicator = obj.options.displayNoteIndicator
     options.compactMode = obj.options.compactMode
     options.launchWithDoubleClick = obj.options.launchWithDoubleClick
   }
@@ -48,8 +55,8 @@ browser.storage.local.get().then((res) => {
 })
 
 eventTgts.forEach((tgt, i, arr) => {
-  tgt.addListener(() => {
-    update('reload')
+  tgt.addListener((id, info) => {
+    update(id, info)
   })
 })
 browser.browserAction.onClicked.addListener((tab) => {

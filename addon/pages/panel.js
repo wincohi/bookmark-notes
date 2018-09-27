@@ -3,7 +3,9 @@ const defaultOptions = {
   showFavicons:0,
   showFaviconPlaceholder:1,
   displayInlineNotes:0,
-  compactMode:0,
+  highlightCurrentPage:0,
+  displayNoteIndicator:1,
+  compactMode:1,
   launchWithDoubleClick:0
 }
 var tree = { id:'root________', children:[] },
@@ -20,25 +22,20 @@ var tree = { id:'root________', children:[] },
 
 // initial storage gets
 browser.storage.local.get().then((res) => {
-  if (res.collapsed) {
+  if (res.collapsed)
     collapsedFolders = res.collapsed
-  }
-  if (res.opened) {
+  if (res.opened)
     openedFolders = res.opened
-  }
   if (res.options) {
     options = res.options
+    updateClasses()
   }
-  if (res.favicons) {
+  if (res.favicons)
     favicons = res.favicons
-  }
-}, (err) => {
-  console.error(`error getting local storage: '${err}'`)
 })
 browser.storage.sync.get('notes').then((res) => {
   notes = res.notes || {}
-}, (err) => {
-  console.error(`error getting synced notes: '${err}`)
+  markNotes()
 })
 
 var checkTitle = (input = { title:'', url:'' }) => {
@@ -53,6 +50,26 @@ var checkTitle = (input = { title:'', url:'' }) => {
     default:
       return input.title
   }
+},
+updateClasses = async () => {
+  let classes = []
+  if (options.compactMode)
+    classes.push('compact-mode')
+  if (options.displayNoteIndicator)
+    classes.push('note-highlight')
+  let classString = classes.toString().replace(',', ' ')
+  document.body.setAttribute('class', classString)
+},
+markNotes = async () => {
+  let noteIds = Object.getOwnPropertyNames(notes)
+  if (document.querySelector('[data-has-note]')) {
+    document.querySelectorAll('[data-has-note]').forEach((el) => el.removeAttribute('data-has-note'))
+  }
+  noteIds.forEach((id, i, arr) => {
+    let el = document.querySelector(`[data-id="${id}"]`)
+    if (el)
+      el.setAttribute('data-has-note', 'true')
+  })
 },
 setAttributes = async (el, atts, method = 'set') => {
   let doAttr = (e, a = atts) => {
@@ -72,15 +89,10 @@ setAttributes = async (el, atts, method = 'set') => {
   }
   if (el.length) {
     // if el is an array instead of a single NodeObject, handle it appropriately
-    if (atts.length) {
-      el.forEach((item, index) => {
-        doAttr(item, atts[index])
-      })
-    } else {
-      el.forEach((item, index) => {
-        doAttr(item)
-  })
-    }
+    if (atts.length)
+      el.forEach((item, index) => doAttr(item, atts[index]))
+    else
+      el.forEach((item, index) => doAttr(item))
   } else {
     doAttr(el)
   }
@@ -91,6 +103,50 @@ getAttributes = (input, attr) => {
     output.push(item.getAttribute(attr))
   })
   return output
+},
+toggleSearchFocused = async (c = '', s = document.querySelector('#search-bar-outer')) => {
+  switch (c) {
+    case 'focus':
+      s.setAttribute('focused', 'true')
+    break
+    case 'blur':
+      s.removeAttribute('focused')
+    break
+    default:
+      // nothing here
+  }
+},
+filter = async (query = '') => {
+  document.querySelectorAll('[filter-match]').forEach((el, i, arr) => el.removeAttribute('filter-match'))
+  if (query === '' && document.body.hasAttribute('filtering')) {
+    document.body.removeAttribute('filtering')
+  } else {
+    let queryR = new RegExp(query, 'i')
+    if (!document.body.hasAttribute('filtering'))
+      document.body.setAttribute('filtering', 'true')
+    let allElements = document.querySelectorAll('li>.title')
+    matches = {
+      liArray:[],
+      ulArray:[]
+    },
+    markParents = async (el) => {
+      if (el.parentElement && el.parentElement.nodeName === 'UL') {
+        matches.ulArray.push(el.parentElement)
+        markParents(el.parentElement)
+      }
+    }
+    allElements.forEach((el, i, arr) => {
+      let title = el.getAttribute('data-title'),
+      url = el.getAttribute('title')
+      if (queryR.test(title) || queryR.test(url))
+        matches.liArray.push(el.parentElement)
+    })
+    matches.liArray.forEach((el, i, arr) => {
+      el.setAttribute('filter-match', 'true')
+      markParents(el)
+    })
+    matches.ulArray.forEach((el, i, arr) => el.setAttribute('filter-match', 'true'))
+  }
 },
 makeTemplate = async (i) => {
   let elType = 'li',
@@ -137,7 +193,6 @@ makeTemplate = async (i) => {
     break
     default:
       // nothing to see here, go home
-    break
   }
   el = document.createElement(elType)
   elTarget.arr = [el, elChild]
@@ -162,6 +217,8 @@ makeTemplate = async (i) => {
         el.appendChild(favicon)
     }
   }
+  if (notes[i.id])
+    setParams[0]['data-has-note'] = 'true'
   el.appendChild(elChild)
   setParams[0].class += ` ${i.type}`
   setAttributes([el, elChild], setParams)
@@ -170,10 +227,19 @@ makeTemplate = async (i) => {
   }
   return el
 },
-addListeners = async (event = '', element, func, params) => {
-  element.addEventListener(event, (ev) => {
-    func(params, ev)
-  })
+addListeners = async (event, element, func, params) => {
+  if (element.length) {
+    element.forEach((el, i, arr) => {
+      let thisEvent = event,
+      thisFunc = func[i] || func,
+      thisParams = params
+      if (typeof(event) === 'object') thisEvent = event[i]
+      if (typeof(params) === 'object' && params.length) thisParams = params[i]
+      el.addEventListener(thisEvent, (ev) => thisFunc(thisParams, ev))
+    })
+  } else {
+    element.addEventListener(event, (ev) => func(params, ev))
+  }
 },
 makeTree = async (item, parent = tree) => {
   let parentEl = document.querySelector(`[data-id="${parent.id}"]`)
@@ -218,7 +284,12 @@ closePopup = async (method) => {
   popup.id = popup.element.getAttribute('data-open-id')
   switch (method) {
     case 'save':
-      notes[popup.id] = document.querySelector('#note-input').value
+      let note = document.querySelector('#note-input').value
+      if (note !== '')
+        notes[popup.id] = note
+      else if (notes[popup.id]) {
+        delete notes[popup.id]
+      }
       browser.storage.sync.set({ notes:notes })
     case 'cancel':
       setAttributes([document.body, popup.element], ['popup-opened', 'data-open-id'], 'remove')
@@ -238,11 +309,11 @@ expandCollapse = async (elId, ev) => {
     switch (collEl.length) {
       case 0:
         /* if there are no open elements, but there are
-        * still folder IDs in openedFolders, remove them all */
+         * still folder IDs in openedFolders, remove them all */
         if (openedFolders !== []) {
           newOpen = []
         }
-        break
+      break
       default:
         // add new items to storage, and remove old ones
         openEl.forEach((item, index, arr) => {
@@ -263,7 +334,7 @@ expandCollapse = async (elId, ev) => {
         if (collapsedFolders !== []) {
           newColl = []
         }
-        break
+      break
       default:
         collEl.forEach((item, index, arr) => {
           if (!collapsedFolders.includes(item)) {
@@ -283,49 +354,142 @@ expandCollapse = async (elId, ev) => {
 panelInit = async (isReload = false) => {
   if (!isReload) {
     // we don't need to add listeners to Save & Cancel buttons if we already have, so don't
-    document.querySelector('#popup-buttons>.button.cancel').addEventListener('click', (ev) => {
-      closePopup('cancel', ev)
-    })
-    document.querySelector('#popup-buttons>.button.save').addEventListener('click', (ev) => {
-      closePopup('save', ev)
-    })
+    let elements = [
+      document.querySelector('#popup-buttons>.button.cancel'),
+      document.querySelector('#popup-buttons>.button.save')
+    ]
+    addListeners('click', elements, closePopup, ['cancel', 'save'])
   } else {
     // clear the tree if we're reloading the bookmarks from scratch
     document.querySelector('#tree').innerHTML = ''
   }
-  await browser.bookmarks.getTree().then((res) => {
-    tree = res[0]
-  }, (err) => {
-    console.error(`error getting bookmarks: '${err}'`)
-  })
-  tree.children.forEach((b, i, arr) => {
-    makeTree(b)
-  })
+  if (isReload)
+    updateClasses()
+  await browser.bookmarks.getTree().then((t) => tree = t[0])
+  tree.children.forEach((b, i, arr) => makeTree(b))
+},
+newBookmark = async (item) => {
+  let newItem,
+  parent
+  if (item) {
+    newItem = await makeTemplate(item)
+    parent = document.querySelector(`[data-id="${item.parentId}"]`)
+    parent.insertBefore(newItem, parent.children[item.index])
+  }
+},
+moveBookmark = async (id, oldInfo, newInfo) => {
+  let newParent = document.querySelector(`[data-id=${newInfo.parent}]`),
+  el = document.querySelector(`[data-id="${id}"]`),
+  newIndex = () => {
+    // if the entry is being moved within the same folder, we need to correct for that
+    if (oldInfo.parent === newInfo.parent && oldInfo.index < newInfo.index)
+      return 2
+    else
+      return 1
+  }
+  if (el)
+    newParent.insertBefore(el, newParent.children[newInfo.index + newIndex()])
+  else
+    browser.bookmarks.get(id).then((res) => newBookmark(res[0]))
+},
+deleteBookmark = async (id) => {
+  let b = document.querySelector(`[data-id="${id}"]`)
+  if (b)
+    b.remove()
+  else
+    console.log(`bookmarks.onRemoved fired, but no element exists with id '${id}'`)
+},
+updateBookmark = async (id, info) => {
+  let b = document.querySelector(`[data-id="${id}"]>.title`)
+  if (b) {
+    if (info.title) {
+      b.innerText = info.title
+      b.setAttribute('data-title', info.title)
+    }
+    if (info.url)
+      b.setAttribute('title', info.url)
+  } else {
+    browser.bookmarks.get(id).then((res) => newBookmark(res[0]))
+  }
+},
+checkActive = async (url) => {
+  let matchingBookmark = document.querySelector(`[title="${url}"]`),
+  prev = document.querySelector('[current-tab]')
+  console.log(`searching for bookmark to match '${url}'`)
+  if (prev)
+    prev.removeAttribute('current-tab')
+  if (matchingBookmark)
+    matchingBookmark.parentElement.setAttribute('current-tab', 'true')
 }
 
 // - - - end function defs - - -
 
 panelInit()
 
+browser.permissions.contains({ permissions:['tabs'] }).then((res) => {
+  if (res) {
+    [browser.tabs.onUpdated, browser.tabs.onActivated].forEach((ev, i, arr) => {
+      ev.addListener((tId) => browser.tabs.query({ active: true, currentWindow: true }).then((tabs) =>
+        tabs.forEach((t) => checkActive(t.url))
+      ))
+    })
+  }
+})
 browser.runtime.onMessage.addListener((msg, sender, respond) => {
   switch (msg.type) {
-    case 'reload':
-      respond({ type:'log', response:'*thumbs up emoji*' })
-      panelInit(true)
-      break
+    case 'created':
+      newBookmark(msg.info.bookmark)
+    break
+    case 'moved':
+      let oldInfo = {
+        parent:msg.info.oldParentId,
+        index:msg.info.oldIndex
+      },
+      newInfo = {
+        parent:msg.info.parentId,
+        index:msg.info.index
+      }
+      moveBookmark(msg.id, oldInfo, newInfo)
+    break
+    case 'removed':
+      deleteBookmark(msg.id)
+    break
+    case 'changed':
+      updateBookmark(msg.id, { title:msg.info.title, url:msg.info.url })
+    break
+    case 'permissionsAdded':
+      [browser.tabs.onUpdated, browser.tabs.onActivated].forEach((ev, i, arr) => {
+        ev.addListener((tId) => browser.tabs.query({ active: true, currentWindow: true }).then((tab) =>
+          checkActive(tab.url)
+        ))
+      })
+    break
     default:
-      respond({ type:'error', response:`unknown or missing message type: '${msg.type}'` })
+      // there's literally nothing here
   }
+  browser.bookmarks.getTree().then((t) => tree = t[0])
+  respond({ type:'log', response:`processed message type: '${msg.type}'` })
 })
 browser.storage.onChanged.addListener((change, area) => {
-  if (area === 'sync') {
-    notes = change.notes.newValue
-  }
-  if (area === 'local' && change.favicons) {
-    favicons = change.favicons.newValue
-  }
-  if (area === 'local' && change.options) {
-    options = change.options.newValue
-    panelInit(true)
+  switch (area) {
+    case 'sync':
+      notes = change.notes.newValue
+      markNotes()
+    break
+    case 'local':
+      if (change.favicons)
+        favicons = change.favicons.newValue
+      if (change.options) {
+        options = change.options.newValue
+        panelInit(true)
+      }
+    break
+    default:
+      // nope.
   }
 })
+document.querySelector('#search').addEventListener('click', (ev) => document.querySelector('#search-bar-inner').focus())
+;['blur', 'focus'].forEach((ev, i, arr) =>
+  document.querySelector('#search-bar-inner').addEventListener(ev, () =>
+    toggleSearchFocused(ev)))
+document.querySelector('#search-bar-inner').addEventListener('input', (ev) => filter(document.querySelector('#search-bar-inner').value))
