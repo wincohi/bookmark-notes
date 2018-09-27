@@ -2,6 +2,7 @@
 
 This extension was built in a day.
 
-<u>[Download & install from AMO][amo]</u>
+[Download & install from AMO][0] or [use the latest release][1]
 
-[amo]: https://addons.mozilla.org/en-US/firefox/addon/bookmark-notes/
+[0]: https://addons.mozilla.org/en-US/firefox/addon/bookmark-notes/
+[1]: https://github.com/emmyemi/bookmark-notes/releases
