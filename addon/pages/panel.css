@@ -269,7 +269,7 @@ body:not([popup-opened]) #popup{
 
 /* options */
 
-body.compact-mode li>.title{
+body.compact-mode .title{
   text-overflow:clip;
   white-space:nowrap;
   overflow:hidden;
