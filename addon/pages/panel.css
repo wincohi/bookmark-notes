@@ -104,7 +104,7 @@ ul+li{
   overflow-wrap:break-word;
   width:100%;
 }
-.has-favicon>.title{
+body.show-favicons li>.title{
   max-width:calc(100% - 1.15em);
 }
 ul>.title{
@@ -269,6 +269,13 @@ body:not([popup-opened]) #popup{
 
 /* options */
 
+.favicon{
+  display:none;
+}
+body.show-favicons .favicon:not(.default-favicon),
+body.show-favicons.show-default-favicons .favicon.default-favicon{
+  display:block;
+}
 body.compact-mode .title{
   text-overflow:clip;
   white-space:nowrap;
