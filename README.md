@@ -2,7 +2,20 @@
 
 This extension was built in a day.
 
-[Download & install from AMO][0] or [use the latest release][1]
+~~Download & install from AMO or use the latest release~~
 
-[0]: https://addons.mozilla.org/en-US/firefox/addon/bookmark-notes/
-[1]: https://github.com/emmyemi/bookmark-notes/releases
+- - - - -
+
+This is a **pre-release** branch for the development of version `1.2.1`.
+
+Roadmap for this release, in order of priority:
+
+- [x] Generate bookmarks tree element in the background (#25, #23)
+- [ ] Add a status and error log when importing items (#22)
+- [ ] Misc: #30
+
+Known issues:
+
+- Changing options requires re-opening the sidebar for them to take effect
+- Updating notes doesn't mark or un-mark bookmarks
+- Previously collapsed / uncollapsed folders are not properly saved
