@@ -55,7 +55,7 @@ doImport = async (opts) => {
     })
     browser.storage.local.set({favicons:currentItems.favicons})
   }
-  sendMsg({type:'reload'}).then((msg) => {
+  sendMsg({ type:'reload' }).then((msg) => {
     console[msg.type](msg.response)
   })
 },

@@ -1,12 +1,3 @@
-/* todo:
- * [ ] re-evaluate options when they change
- * [ ] update items with [data-has-note]...
- *   [ ] ...in panel initially
- *   [ ] ...when storage.sync changes
- * [-] fix updating bookmarks
- *   [x] add
- *   [ ] change
- */
 var popup = { element:document.querySelector('#popup-bg') },
 popupTitle = document.querySelector('#popup-title'),
 popupUrl = document.querySelector('#popup-url'),
@@ -28,38 +19,32 @@ openedFolders = [],
 bookmarkLaunching = false,
 timerId
 
-var $ = async (selector, context = document) => {
+var $ = (selector, context = document, forceType = '') => {
   let res = context.querySelectorAll(selector)
+  switch (forceType) {
+    case 'array': return res
+    case 'node': return res[0]
+    default:
+  }
   switch (res.length) {
-    case 0: return undefined
+    case 0: return null
     case 1: return res[0]
     default: return res
   }
 },
-updateClasses = async () => {
-  let classes = []
-  if (options.compactMode)
-    classes.push('compact-mode')
-  if (options.displayNoteIndicator)
-    classes.push('note-highlight')
-  if (options.showFavicons)
-    classes.push('show-favicons')
-  let classString = classes.toString().replace(',', ' ')
-  document.body.setAttribute('class', classString)
-},
 markNotes = async () => {
-  let noteIds = Object.getOwnPropertyNames(notes)
-  if ($('[data-has-note]')) {
-
-    $('[data-has-note]').forEach((el) => el.classList.remove('has-note'))
+  let noteIds = Object.getOwnPropertyNames(notes),
+  hasNoteElements = $('[data-has-note]', undefined, 'array')
+  if (hasNoteElements) {
+    hasNoteElements.forEach((el) => el.removeAttribute('data-has-note'))
   }
   noteIds.forEach((id, i, arr) => {
     let el = $(`[data-id="${id}"]`)
     if (el)
-      el.classList.add('has-note')
+      el.setAttribute('data-has-note', 'true')
   })
 },
-toggleSearchFocused = async (c = '', s = document.querySelector('#search-bar-outer')) => {
+toggleSearchFocused = async (c = '', s = $('#search-bar-outer')) => {
   switch (c) {
     case 'focus':
       s.setAttribute('focused', 'true')
@@ -72,7 +57,7 @@ toggleSearchFocused = async (c = '', s = document.querySelector('#search-bar-out
   }
 },
 filter = async (query = '') => {
-  let oldMatches = await $('[filter-match]')
+  let oldMatches = $('[filter-match]', undefined, 'array')
   if (oldMatches) oldMatches.forEach((el, i, arr) => el.removeAttribute('filter-match'))
   if (query === '' && document.body.hasAttribute('filtering')) {
     document.body.removeAttribute('filtering')
@@ -80,7 +65,7 @@ filter = async (query = '') => {
     let queryR = new RegExp(query, 'i')
     if (!document.body.hasAttribute('filtering'))
       document.body.setAttribute('filtering', 'true')
-    let allElements = await $('li>.title')
+    let allElements = $('li>.title')
     matches = {
       liArray:[],
       ulArray:[]
@@ -106,8 +91,8 @@ filter = async (query = '') => {
 },
 expandCollapse = async (elId, tgt) => {
   tgt.classList.toggle('collapsed')
-  let collEl = getAttributes(document.querySelectorAll('.collapsed'), 'data-id'),
-  openEl = getAttributes(document.querySelectorAll('.folder:not(.collapsed)'), 'data-id'),
+  let collEl = getAttributes($('.collapsed'), 'data-id'),
+  openEl = getAttributes($('.folder:not(.collapsed)'), 'data-id'),
   newColl = collapsedFolders || [],
   newOpen = openedFolders || []
   if (options.startCollapsed) {
@@ -159,14 +144,14 @@ expandCollapse = async (elId, tgt) => {
 openPopup = async (obj) => {
   let delayedOpen = () => {
     if (notes[obj.id]) {
-      document.querySelector('#note-input').value = notes[obj.id]
+      $('#note-input').value = notes[obj.id]
     }
     setAttributes([document.body, popup.element, popupTitle, popupUrl],
       [{ 'popup-opened': 'true' },
       { 'data-open-id': obj.id },
       { 'title': obj.title },
       { 'title': obj.url, 'href': obj.url }])
-    document.querySelector('#note-input').focus()
+    $('#note-input').focus()
     bookmarkLaunching = false
   },
   launchBookmark = () => {
@@ -189,7 +174,7 @@ closePopup = async (method) => {
   popup.id = popup.element.getAttribute('data-open-id')
   switch (method) {
     case 'save':
-      let note = document.querySelector('#note-input').value
+      let note = $('#note-input').value
       if (note !== '')
         notes[popup.id] = note
       else if (notes[popup.id]) {
@@ -198,7 +183,7 @@ closePopup = async (method) => {
       browser.storage.sync.set({ notes:notes })
     case 'cancel':
       setAttributes([document.body, popup.element], ['popup-opened', 'data-open-id'], 'remove')
-      document.querySelector('#note-input').value = ''
+      $('#note-input').value = ''
     break
     default:
       console.error(`unknown popup handling method: ${method}`)
@@ -234,7 +219,8 @@ panelInit = async () => {
     addListeners('click', [buttonCancel, buttonSave], closePopup, ['cancel', 'save'])
     document.body.addEventListener('click', handleClick)
     if (bgWindow.firstLoad) {
-      document.querySelector('#panel').replaceChild(bgWindow.treeHTML.cloneNode(true), treeElement)
+      $('#panel').replaceChild(bgWindow.treeHTML.cloneNode(true), treeElement)
+      markNotes()
     }
     doOptions()
   })
@@ -243,7 +229,7 @@ newBookmark = async (item) => {
   let parent, el
   if (item) {
     await browser.runtime.getBackgroundPage().then((w) => el = w.tempElement)
-    parent = await $(`[data-id="${item.parentId}"]`)
+    parent = $(`[data-id="${item.parentId}"]`)
     addListeners('click', el, openPopup, {
       title:el.querySelector('.title').getAttribute('data-title'),
       url:el.querySelector('.title').getAttribute('title'),
@@ -253,8 +239,8 @@ newBookmark = async (item) => {
   }
 },
 moveBookmark = async (id, oldInfo, newInfo) => {
-  let newParent = await $(`[data-id=${newInfo.parent}]`),
-  el = await $(`[data-id="${id}"]`),
+  let newParent = $(`[data-id=${newInfo.parent}]`),
+  el = $(`[data-id="${id}"]`),
   newIndex = () => {
     // if the entry is being moved within the same folder, we need to correct for that
     if (oldInfo.parent === newInfo.parent && oldInfo.index < newInfo.index)
@@ -268,29 +254,28 @@ moveBookmark = async (id, oldInfo, newInfo) => {
     browser.bookmarks.get(id).then((res) => newBookmark(res[0], null, id))
 },
 deleteBookmark = async (id) => {
-  let b = await $(`[data-id="${id}"]`)
+  let b = $(`[data-id="${id}"]`)
   if (b)
     b.remove()
   else
     console.warn(`bookmarks.onRemoved fired, but no element exists with id '${id}'`)
 },
 updateBookmark = async (id, info) => {
-  let b = await $(`[data-id="${id}"]>.title`)
+  let b = $(`[data-id="${id}"]>.title`)
   if (b) {
     if (info.title) {
       b.innerText = info.title
       b.setAttribute('data-title', info.title)
     }
-    if (info.url)
-      b.setAttribute('title', info.url)
+    if (info.url) b.setAttribute('title', info.url)
   } else {
     browser.bookmarks.get(id).then((res) => newBookmark(res[0], null, id))
   }
 },
 checkActive = async (url) => {
   if (options.highlightCurrentPage) {
-    let matchingBookmark = await $(`[title="${url}"]`),
-    prev = await $('[current-tab]')
+    let matchingBookmark = $(`[title="${url}"]`),
+    prev = $('[current-tab]')
     console.log(`searching for bookmark to match '${url}'`)
     if (prev)
       prev.removeAttribute('current-tab')
@@ -316,7 +301,7 @@ browser.runtime.onMessage.addListener((msg, sender, respond) => {
   switch (msg.type) {
     case 'created':
       newBookmark(msg.info.bookmark)
-    break
+      break
     case 'moved':
       let oldInfo = {
         parent:msg.info.oldParentId,
@@ -327,30 +312,38 @@ browser.runtime.onMessage.addListener((msg, sender, respond) => {
         index:msg.info.index
       }
       moveBookmark(msg.id, oldInfo, newInfo)
-    break
+      break
     case 'removed':
       deleteBookmark(msg.id)
-    break
+      break
     case 'changed':
       updateBookmark(msg.id, { title:msg.info.title, url:msg.info.url })
-    break
+      break
     case 'permissionsAdded':
       [browser.tabs.onUpdated, browser.tabs.onActivated].forEach((ev, i, arr) => {
         ev.addListener((tId) => browser.tabs.query({ active: true, currentWindow: true }).then((tab) =>
           checkActive(tab.url)
         ))
       })
-    break
+      break
     case 'load':
       $('#panel').replaceChild(msg.info.treeHTML, treeElement)
-    break
+      break
+    case 'updateNotes':
+      notes = msg.notes
+      markNotes()
+      break
+    case 'updateOptions':
+      options = msg.options
+      doOptions()
+      break
     default:
       // there's literally nothing here
   }
   respond({ type:'log', response:`processed message type: '${msg.type}'` })
 })
-document.querySelector('#search').addEventListener('click', (ev) => document.querySelector('#search-bar-inner').focus())
+$('#search').addEventListener('click', (ev) => $('#search-bar-inner').focus())
 ;['blur', 'focus'].forEach((ev, i, arr) =>
-  document.querySelector('#search-bar-inner').addEventListener(ev, () =>
+  $('#search-bar-inner').addEventListener(ev, () =>
     toggleSearchFocused(ev)))
-document.querySelector('#search-bar-inner').addEventListener('input', (ev) => filter(document.querySelector('#search-bar-inner').value))
+$('#search-bar-inner').addEventListener('input', (ev) => filter($('#search-bar-inner').value))

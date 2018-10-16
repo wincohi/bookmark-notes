@@ -74,7 +74,7 @@ firstLoad = false
 Object.getOwnPropertyNames(SHARE).forEach((prop) => window[prop] = SHARE[prop])
 setAttributes(treeHTML, { id: 'tree', 'data-id': tree.id })
 
-var $ = async (selector, context = document) => {
+var $ = (selector, context = document) => {
   let res = context.querySelectorAll(selector)
   switch (res.length) {
     case 0: return undefined
@@ -84,7 +84,9 @@ var $ = async (selector, context = document) => {
 },
 update = async (id, info) => {
   let updTree = async () => {
-    browser.bookmarks.getTree().then((t) => tree = t[0])
+    treeHTML = document.createElement('div')
+    await browser.bookmarks.getTree().then((t) => tree = t[0])
+    setAttributes(treeHTML, { id: 'tree', 'data-id': tree.id })
     tree.children.forEach((item) => makeTree(item))
   }
   updTree()
@@ -217,7 +219,7 @@ makeTemplate = async (i) => {
 makeTree = async (item, parent = tree) => {
   let parentEl
   if (parent.id === tree.id) parentEl = treeHTML
-  else parentEl = treeHTML.querySelector(`[data-id="${parent.id}"]`)
+  else parentEl = $(`[data-id="${parent.id}"]`, treeHTML)
   parentEl.appendChild(await makeTemplate(item))
   if (item.children) {
     for (child of item.children) {
@@ -239,8 +241,8 @@ init = async () => {
   await browser.bookmarks.getTree().then((t) => {
     tree = t[0]
     tree.children.forEach((item, i, arr) => makeTree(item))
+    firstLoad = true
   })
-  firstLoad = true
   sendMsg({ type:'load', info:Window })
 }
 
@@ -254,14 +256,16 @@ browser.storage.onChanged.addListener((change, area) => {
   switch (area) {
     case 'sync':
       notes = change.notes.newValue
-      sendMsg({type:'updateNotes', notes:change.notes.newValue}).then((msg) => console[msg.type](msg.response))
-    break
+      sendMsg({ type:'updateNotes', notes:change.notes.newValue }).then((msg) => console[msg.type](msg.response))
+      break
     case 'local':
       if (change.favicons)
         favicons = change.favicons.newValue
-      if (change.options)
+      if (change.options) {
         loadOptions(change)
-    break
+        sendMsg({ type:'updateOptions', options:options }).then((msg) => console[msg.type](msg.response))
+      }
+      break
     default:
       // nope.
   }
