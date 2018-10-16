@@ -12,10 +12,12 @@ Roadmap for this release, in order of priority:
 
 - [x] Generate bookmarks tree element in the background (#25)
 - [ ] Add a status and error log when importing items (#22)
-- [ ] Misc: #23, #30, #40
+- [ ] Misc:
+    - [ ] #23
+    - [x] #30
+    - [x] #40
 
 Known issues:
 
-- Changing options requires re-opening the sidebar for them to take effect
-- Updating notes doesn't mark or un-mark bookmarks
-- ~~Adding and~~ updating bookmarks doesn't update the sidebar appropriately
+- Changing the "Folders start collapsed" option doesn't update the sidebar properly
+- Importing favicons doesn't update icons in the sidebar
