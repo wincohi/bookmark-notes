@@ -146,6 +146,9 @@ ul>ul.collapsed{
 ul>.title:hover{
   opacity:.8;
 }
+li>.title{
+  pointer-events:none;
+}
 li:hover{
   border-color:hsla(240,5%,50%,.25);
   background-color:-moz-buttonhoverface;

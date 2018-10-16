@@ -9,13 +9,6 @@ var DEFAULT_OPTIONS = {
   launchWithDoubleClick:0
 },
 SHARE = {
-  $: async (selector, context = document) => {
-    let res = context.querySelectorAll(selector)
-    {
-      if (res.length > 1) return res
-      else return res[0]
-    }
-  },
   setAttributes: async (el, atts, method = 'set') => {
     let doAttr = (e, a = atts) => {
       let attNames = Object.getOwnPropertyNames(a)
@@ -63,58 +56,6 @@ SHARE = {
       element.addEventListener(event, (ev) => func(params, ev))
     }
   },
-  expandCollapse: async (elId, ev) => {
-    ev.currentTarget.parentElement.classList.toggle('collapsed')
-    let collEl = SHARE.getAttributes(document.querySelectorAll('.collapsed'), 'data-id'),
-    openEl = SHARE.getAttributes(document.querySelectorAll('.folder:not(.collapsed)'), 'data-id'),
-    newColl = collapsedFolders || [],
-    newOpen = openedFolders || []
-    if (options.startCollapsed) {
-      switch (collEl.length) {
-        case 0:
-          /* if there are no open elements, but there are
-          * still folder IDs in openedFolders, remove them all */
-          if (openedFolders !== []) {
-            newOpen = []
-          }
-        break
-        default:
-          // add new items to storage, and remove old ones
-          openEl.forEach((item, index, arr) => {
-            if (!openedFolders.includes(item)) {
-              newOpen.push(item)
-            }
-          })
-          openedFolders.forEach((item, index, arr) => {
-            if (!openEl.includes(item)) {
-              newOpen.splice(newOpen.indexOf(item), 1)
-            }
-          })
-      }
-      openedFolders = newOpen
-    } else {
-      switch (collEl.length) {
-        case 0:
-          if (collapsedFolders !== []) {
-            newColl = []
-          }
-        break
-        default:
-          collEl.forEach((item, index, arr) => {
-            if (!collapsedFolders.includes(item)) {
-              newColl.push(item)
-            }
-          })
-          collapsedFolders.forEach((item, index, arr) => {
-            if (!collEl.includes(item)) {
-              newColl.splice(newColl.indexOf(item), 1)
-            }
-          })
-      }
-      collapsedFolders = newColl
-    }
-    browser.storage.local.set({ collapsed:newColl, opened:newOpen })
-  },
   checkLocal: async (filter) => browser.storage.local.get(filter || null),
   checkSync: async (filter) => browser.storage.sync.get(filter || null),
   sendMsg: async (msg) => browser.runtime.sendMessage(msg)
@@ -122,6 +63,7 @@ SHARE = {
 
 var tree = { id: 'root________', children: [] },
 treeHTML = document.createElement('div'),
+tempElement,
 notes = {},
 collapsedFolders = [],
 openedFolders = [],
@@ -132,13 +74,38 @@ firstLoad = false
 Object.getOwnPropertyNames(SHARE).forEach((prop) => window[prop] = SHARE[prop])
 setAttributes(treeHTML, { id: 'tree', 'data-id': tree.id })
 
-var update = async (id, info) => {
-  let type = ''
-  { 
-    if (info.type) type = 'created'
-    else if (info.oldParentId) type = 'moved'
-    else if (info.parentId) type = 'removed'
-    else if (info.title || info.url) type = 'changed'
+var $ = async (selector, context = document) => {
+  let res = context.querySelectorAll(selector)
+  switch (res.length) {
+    case 0: return undefined
+    case 1: return res[0]
+    default: return res
+  }
+},
+update = async (id, info) => {
+  let updTree = async () => {
+    browser.bookmarks.getTree().then((t) => tree = t[0])
+    tree.children.forEach((item) => makeTree(item))
+  }
+  updTree()
+  let type = '', el
+  if (info.bookmark) type = 'created'
+  else if (info.oldParentId) type = 'moved'
+  else if (info.parentId) type = 'removed'
+  else if (info.title || info.url) type = 'changed'
+  switch (type) {
+    case 'created':
+      el = await makeTemplate(info.bookmark)
+      tempElement = el
+      break
+    case 'moved':
+    case 'changed':
+      let bItem = await browser.bookmarks.get(id)
+      el = await makeTemplate(bItem[0])
+      tempElement = el
+      break
+    default:
+      // nothin'
   }
   sendMsg({ type:type, id:id, info:info }).then((msg) => console[msg.type](msg.response))
 },
@@ -182,8 +149,6 @@ checkTitle = (input = { title:'', url:'' }) => {
 },
 makeTemplate = async (i) => {
   let elType = 'li',
-  handleFunc,
-  handleParams,
   setParams = [{ 'data-id':i.id, 'class':'item' }, { 'class':'title' }],
   el,
   favicon = document.createElement('img'),
@@ -216,7 +181,6 @@ makeTemplate = async (i) => {
     break
     case 'folder':
       elType = 'ul'
-      handleFunc = expandCollapse
       handleParams = i.id
       elTarget.v = 1
       setParams[0].class += isCollapsed(i.id)
@@ -248,9 +212,6 @@ makeTemplate = async (i) => {
   el.appendChild(elChild)
   setParams[0].class += ` ${i.type}`
   setAttributes([el, elChild], setParams)
-  if (i.type === 'folder') {
-    addListeners('click', elTarget.arr[elTarget.v], handleFunc, handleParams)
-  }
   return el
 },
 makeTree = async (item, parent = tree) => {
@@ -266,17 +227,16 @@ makeTree = async (item, parent = tree) => {
   }
 },
 init = async () => {
-  checkLocal().then((res) => {
+  await checkLocal().then((res) => {
     loadOptions(res)
     collapsedFolders = res.collapsed || []
     openedFolders = res.opened || []
     favicons = res.favicons || {}
   })
-  checkSync().then((res) => {
+  await checkSync().then((res) => {
     notes = res.notes || {}
   })
   await browser.bookmarks.getTree().then((t) => {
-    console.log(favicons, notes)
     tree = t[0]
     tree.children.forEach((item, i, arr) => makeTree(item))
   })
@@ -294,7 +254,7 @@ browser.storage.onChanged.addListener((change, area) => {
   switch (area) {
     case 'sync':
       notes = change.notes.newValue
-      sendMsg({type:'updateNotes', notes:change.notes.newValue})
+      sendMsg({type:'updateNotes', notes:change.notes.newValue}).then((msg) => console[msg.type](msg.response))
     break
     case 'local':
       if (change.favicons)
