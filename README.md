@@ -10,12 +10,12 @@ This is a **pre-release** branch for the development of version `1.2.1`.
 
 Roadmap for this release, in order of priority:
 
-- [x] Generate bookmarks tree element in the background (#25, #23)
+- [x] Generate bookmarks tree element in the background (#25)
 - [ ] Add a status and error log when importing items (#22)
-- [ ] Misc: #30
+- [ ] Misc: #23, #30, #40
 
 Known issues:
 
 - Changing options requires re-opening the sidebar for them to take effect
 - Updating notes doesn't mark or un-mark bookmarks
-- Previously collapsed / uncollapsed folders are not properly saved
+- ~~Adding and~~ updating bookmarks doesn't update the sidebar appropriately
