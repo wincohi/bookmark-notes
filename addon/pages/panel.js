@@ -14,6 +14,7 @@ optionClasses = {
   compactMode:'compact-mode',
 },
 notes = {},
+favicons = {},
 collapsedFolders = [],
 openedFolders = [],
 bookmarkLaunching = false,
@@ -44,6 +45,18 @@ markNotes = async () => {
       el.setAttribute('data-has-note', 'true')
   })
 },
+setFavicons = async () => {
+  let favIds = Object.getOwnPropertyNames(favicons),
+  hasFavicons = $('.has-favicon', undefined, 'array')
+  if (hasFavicons) {
+    hasFavicons.forEach((item, i, arr) => item.classList.remove('has-favicon'))
+  }
+  favIds.forEach((id, i, arr) => {
+    let el = $('.favicon', $(`[data-id="${id}"]`))
+    setAttributes(el, { 'src':favicons[id], 'class':'favicon' })
+    $(`[data-id="${id}"]`).classList.add('has-favicon')
+  })
+}
 toggleSearchFocused = async (c = '', s = $('#search-bar-outer')) => {
   switch (c) {
     case 'focus':
@@ -209,18 +222,20 @@ handleClick = async (ev) => {
   }
 },
 panelInit = async () => {
-  browser.runtime.getBackgroundPage().then((bgWindow) => {
-    notes = bgWindow.notes
-    options = bgWindow.options
-    collapsedFolders = bgWindow.collapsedFolders,
-    openedFolders = bgWindow.openedFolders
-    let shareFunctions = Object.getOwnPropertyNames(bgWindow.SHARE)
-    shareFunctions.forEach((prop) => window[prop] = bgWindow.SHARE[prop])
+  browser.runtime.getBackgroundPage().then((bg) => {
+    notes = bg.notes
+    favicons = bg.favicons
+    options = bg.options
+    collapsedFolders = bg.collapsedFolders,
+    openedFolders = bg.openedFolders
+    let shareFunctions = Object.getOwnPropertyNames(bg.SHARE)
+    shareFunctions.forEach((prop) => window[prop] = bg.SHARE[prop])
     addListeners('click', [buttonCancel, buttonSave], closePopup, ['cancel', 'save'])
     document.body.addEventListener('click', handleClick)
-    if (bgWindow.firstLoad) {
-      $('#panel').replaceChild(bgWindow.treeHTML.cloneNode(true), treeElement)
+    if (bg.firstLoad) {
+      $('#panel').replaceChild(bg.treeHTML.cloneNode(true), treeElement)
       markNotes()
+      setFavicons()
     }
     doOptions()
   })
@@ -327,7 +342,11 @@ browser.runtime.onMessage.addListener((msg, sender, respond) => {
       })
       break
     case 'load':
-      $('#panel').replaceChild(msg.info.treeHTML, treeElement)
+      browser.runtime.getBackgroundPage().then((w) => {
+        $('#panel').replaceChild(w.treeHTML, $('#tree'))
+        markNotes()
+        setFavicons()
+      })
       break
     case 'updateNotes':
       notes = msg.notes

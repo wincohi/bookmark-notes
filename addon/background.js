@@ -72,7 +72,6 @@ firstLoad = false
 
 
 Object.getOwnPropertyNames(SHARE).forEach((prop) => window[prop] = SHARE[prop])
-setAttributes(treeHTML, { id: 'tree', 'data-id': tree.id })
 
 var $ = (selector, context = document) => {
   let res = context.querySelectorAll(selector)
@@ -82,6 +81,10 @@ var $ = (selector, context = document) => {
     default: return res
   }
 },
+resetTree = () => {
+  treeHTML = document.createElement('div')
+  setAttributes(treeHTML, { id: 'tree', 'data-id': tree.id })
+}
 update = async (id, info) => {
   let updTree = async () => {
     treeHTML = document.createElement('div')
@@ -118,23 +121,8 @@ eventTgts = [
   browser.bookmarks.onRemoved
 ],
 options = DEFAULT_OPTIONS,
-checkDefaults = (opt) => {
-  let optNames = Object.getOwnPropertyNames(DEFAULT_OPTIONS)
-  isSame = 0
-  optNames.forEach((item, i, arr) => {
-    if (opt[item] === DEFAULT_OPTIONS[item]) {
-      isSame++
-    }
-  })
-  if (isSame < optNames.length)
-    return false
-  else
-    return true
-},
-loadOptions = (obj) => {
-  if (obj.options && !checkDefaults(obj.options)) {
-    Object.getOwnPropertyNames(obj.options).forEach((opt) => options[opt] = obj.options[opt])
-  }
+loadOptions = (opts) => {
+  Object.getOwnPropertyNames(opts).forEach((opt) => options[opt] = opts[opt])
 },
 checkTitle = (input = { title:'', url:'' }) => {
   switch (input.title) {
@@ -192,23 +180,12 @@ makeTemplate = async (i) => {
   }
   el = document.createElement(elType)
   elTarget.arr = [el, elChild]
-  switch (favicons[i.id]) {
-    case undefined:
-      if (i.type === 'bookmark') {
-        await setAttributes(favicon, {
-          'src': '/img/default.svg',
-          'class': 'favicon default-favicon'
-        })
-        el.appendChild(favicon)
-      }
-    break
-    default:
-      await setAttributes(favicon, {
-        'src':favicons[i.id],
-        'class':'favicon'
-      })
-      setParams[0].class += ' has-favicon'
-      el.appendChild(favicon)
+  if (i.type === 'bookmark') {
+    await setAttributes(favicon, {
+      'src': '/img/default.svg',
+      'class': 'favicon default-favicon'
+    })
+    el.appendChild(favicon)
   }
   if (notes[i.id]) setParams[0]['data-has-note'] = 'true'
   el.appendChild(elChild)
@@ -229,8 +206,9 @@ makeTree = async (item, parent = tree) => {
   }
 },
 init = async () => {
+  resetTree()
   await checkLocal().then((res) => {
-    loadOptions(res)
+    if (res.options) loadOptions(res.options)
     collapsedFolders = res.collapsed || []
     openedFolders = res.opened || []
     favicons = res.favicons || {}
@@ -243,7 +221,7 @@ init = async () => {
     tree.children.forEach((item, i, arr) => makeTree(item))
     firstLoad = true
   })
-  sendMsg({ type:'load', info:Window })
+  sendMsg({ type:'load' })
 }
 
 init()
@@ -259,14 +237,27 @@ browser.storage.onChanged.addListener((change, area) => {
       sendMsg({ type:'updateNotes', notes:change.notes.newValue }).then((msg) => console[msg.type](msg.response))
       break
     case 'local':
-      if (change.favicons)
+      if (change.favicons) {
         favicons = change.favicons.newValue
+        sendMsg({ type:'updateFavicons', favicons:change.favicons.newValue })
+      }
       if (change.options) {
-        loadOptions(change)
-        sendMsg({ type:'updateOptions', options:options }).then((msg) => console[msg.type](msg.response))
+        loadOptions(change.options.newValue)
+        sendMsg({ type:'updateOptions', options:change.options.newValue }).then((msg) => console[msg.type](msg.response))
       }
       break
     default:
       // nope.
   }
+})
+
+browser.runtime.onMessage.addListener((msg, sender, respond) => {
+  switch (msg.type) {
+    case 'reload':
+      init()
+      break
+    default:
+      // do nothing!
+  }
+  respond({ type:'log', response:`processed message type: '${msg.type}'` })
 })

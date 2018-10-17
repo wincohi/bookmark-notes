@@ -55,9 +55,6 @@ doImport = async (opts) => {
     })
     browser.storage.local.set({favicons:currentItems.favicons})
   }
-  sendMsg({ type:'reload' }).then((msg) => {
-    console[msg.type](msg.response)
-  })
 },
 updateOptions = async (ev) => {
   let thisOption = ev.currentTarget,
@@ -77,10 +74,10 @@ updateOptions = async (ev) => {
       }
     })
   }
+  if (thisOption.id === 'start-collapsed')
+    sendMsg({ type:'reload' }).then((res) => console[res.type](res.response))
   currentOptions[thisOption.getAttribute('name')] = Number(thisOption.checked)
-  checkLocal.then((res) => {
-    browser.storage.local.set({options:currentOptions})
-  })
+  browser.storage.local.set({ options:currentOptions })
 },
 checkLocal = browser.storage.local.get(),
 checkSync = browser.storage.sync.get(),
