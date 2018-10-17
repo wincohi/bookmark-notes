@@ -104,7 +104,7 @@ ul+li{
   overflow-wrap:break-word;
   width:100%;
 }
-.has-favicon>.title{
+body.show-favicons li>.title{
   max-width:calc(100% - 1.15em);
 }
 ul>.title{
@@ -145,6 +145,9 @@ ul>ul.collapsed{
 }
 ul>.title:hover{
   opacity:.8;
+}
+li>.title{
+  pointer-events:none;
 }
 li:hover{
   border-color:hsla(240,5%,50%,.25);
@@ -269,7 +272,14 @@ body:not([popup-opened]) #popup{
 
 /* options */
 
-body.compact-mode li>.title{
+.favicon{
+  display:none;
+}
+body.show-favicons .favicon:not(.default-favicon),
+body.show-favicons.show-default-favicons .favicon.default-favicon{
+  display:block;
+}
+body.compact-mode .title{
   text-overflow:clip;
   white-space:nowrap;
   overflow:hidden;
