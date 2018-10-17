@@ -2,22 +2,7 @@
 
 This extension was built in a day.
 
-~~Download & install from AMO or use the latest release~~
+[Download & install from AMO][0] or [use the latest release][1]
 
-- - - - -
-
-This is a **pre-release** branch for the development of version `1.2.1`.
-
-Roadmap for this release, in order of priority:
-
-- [x] Generate bookmarks tree element in the background (#25)
-- [ ] Add a status and error log when importing items (#22)
-- [x] Misc:
-    - [x] #23
-    - [x] #30
-    - [x] #32
-    - [x] #40
-
-Known issues:
-
-- Changing the "Folders start collapsed" option doesn't update the sidebar properly
+[0]: https://addons.mozilla.org/en-US/firefox/addon/bookmark-notes/
+[1]: https://github.com/emmyemi/bookmark-notes/releases
